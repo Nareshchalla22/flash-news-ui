@@ -1,13 +1,27 @@
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+/* 1. Universal Box Sizing - prevents padding from expanding width */
+* {
+  box-sizing: border-box;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+
+/* 2. Hide Scrollbars globally but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #1e293b; /* slate-800 */
-  border-radius: 10px;
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #3b82f6; /* blue-500 */
+
+/* 3. Force Grid to single column on small screens if it breaks */
+@media (max-width: 767px) {
+  .grid-cols-12 {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Prevent large Bento images from forcing width */
+  .aspect-video, .large-image-450, .large-image-480 {
+    height: auto !important;
+    aspect-ratio: 16 / 9;
+  }
 }
