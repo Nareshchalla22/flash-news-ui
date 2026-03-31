@@ -8,44 +8,52 @@ import { useNavbar } from './Navbar/useNavbar'
 import Footer from './Footer/Footer'
 import Home from './components/Pages/Home'
 import CategoryPage from './components/Pages/categories/CategoryPage'
+
 function App() {
   const { isExpanded, isMobile } = useNavbar();
 
   const breakingNews = "FLASHREPORT: Hyderabad Tech Corridor to see 50,000 new jobs by December 2026!";
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      {/* TOP SECTION: These stay at the very top */}
-      <Ticker scrollingText={breakingNews} />
-      <Header />
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans overflow-x-hidden">
+      {/* 1. TOP SECTION: Fixed or Static at top */}
+      <div className="z-[80] sticky top-0 bg-slate-50">
+        <Ticker scrollingText={breakingNews} />
+        <Header />
+      </div>
 
-      <div className="flex flex-1">
-        {/* FIXED NAVBAR: Stays on the left */}
+      <div className="flex flex-1 relative">
+        {/* 2. SIDEBAR: Visible on Laptop, Hidden/Drawer on Mobile */}
         <Navbar />
 
-        {/* MAIN CONTENT: Moves based on Sidebar width */}
-        <div className={`flex flex-col flex-1 transition-all duration-300 
-          ${isMobile ? 'ml-0 pb-20' : isExpanded ? 'ml-64' : 'ml-20'}`}>
-          
-          <main className="flex-1 p-4 md:p-8">
+        {/* 3. MAIN CONTENT AREA */}
+        <div 
+          className={`flex flex-col flex-1 min-w-0 transition-all duration-300 ease-in-out
+            /* Desktop: Adjust margin based on sidebar state */
+            ${!isMobile ? (isExpanded ? 'ml-64' : 'ml-20') : 'ml-0'}
+            /* Mobile/Laptop: Room for BottomNav (h-16 or h-20) */
+            pb-20 md:pb-24
+          `}
+        >
+          {/* Main Routing Area */}
+          <main className="flex-1 p-4 md:p-8 max-w-[1600px] mx-auto w-full">
             <Routes>
               <Route path="/" element={<Home />} />
-              
-              {/* 2. DYNAMIC CATEGORY VIEW: Now uses the actual component */}
               <Route path="/category/:name" element={<CategoryPage />} />
-
               <Route path="/live-tv" element={<div className="p-20 text-center font-black italic text-2xl">LIVE STREAMING...</div>} />
               <Route path="/id-card" element={<div className="p-20 text-center font-black italic text-2xl">GENERATE PRESS PASS</div>} />
             </Routes>
           </main>
 
+          {/* Footer - Sits above the BottomNav because of pb-20 */}
           <Footer />
         </div>
       </div>
 
+      {/* 4. NAVIGATION BAR: Always at the bottom */}
       <BottomNav />
     </div>
   )
 }
 
-export default App
+export default App;
