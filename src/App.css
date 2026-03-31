@@ -11,3 +11,14 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #3b82f6; /* blue-500 */
 }
+.container {
+  /* Base styles for mobile */
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  /* Styles for screens 768px and wider (tablets/desktops) */
+  .container {
+    flex-direction: row;
+  }
+}

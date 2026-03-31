@@ -7,8 +7,7 @@ import BottomNav from './Bottom/BottomNav'
 import { useNavbar } from './Navbar/useNavbar' 
 import Footer from './Footer/Footer'
 import Home from './components/Pages/Home'
-import CategoryPage from './components/Pages/categories/CategoryPage' // 1. Add this import
-
+import CategoryPage from './components/Pages/categories/CategoryPage'
 function App() {
   const { isExpanded, isMobile } = useNavbar();
 
