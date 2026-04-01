@@ -12,26 +12,28 @@ import CategoryPage from './components/Pages/categories/CategoryPage'
 function App() {
   const { isExpanded, isMobile } = useNavbar();
 
+  // Remove the "if(isMobile) return null;" from here!
+
   const breakingNews = "FLASHREPORT: Hyderabad Tech Corridor to see 50,000 new jobs by December 2026!";
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans overflow-x-hidden">
-      {/* 1. TOP SECTION: Fixed or Static at top */}
+      {/* 1. TOP SECTION */}
       <div className="z-[80] sticky top-0 bg-slate-50">
         <Ticker scrollingText={breakingNews} />
         <Header />
       </div>
 
       <div className="flex flex-1 relative">
-        {/* 2. SIDEBAR: Visible on Laptop, Hidden/Drawer on Mobile */}
-        <Navbar />
+        {/* 2. SIDEBAR: Updated to hide strictly on mobile */}
+        {!isMobile && <Navbar />}
 
         {/* 3. MAIN CONTENT AREA */}
         <div 
           className={`flex flex-col flex-1 min-w-0 transition-all duration-300 ease-in-out
             /* Desktop: Adjust margin based on sidebar state */
             ${!isMobile ? (isExpanded ? 'ml-64' : 'ml-20') : 'ml-0'}
-            /* Mobile/Laptop: Room for BottomNav (h-16 or h-20) */
+            /* Mobile/Laptop: Room for BottomNav */
             pb-20 md:pb-24
           `}
         >
@@ -45,7 +47,6 @@ function App() {
             </Routes>
           </main>
 
-          {/* Footer - Sits above the BottomNav because of pb-20 */}
           <Footer />
         </div>
       </div>
