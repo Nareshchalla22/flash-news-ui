@@ -1,33 +1,17 @@
-import React, { useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { newsData } from '../../Data/newsdata';
-import { navItems } from '../../../Navbar/navdata';
-import SocialStats from '../../Stats/SocialStats';
-import { TrendingUp, CloudSun, Target, Award } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { TrendingUp, CloudSun, Target } from 'lucide-react';
+import SocialStats from '../Stats/SocialStats';
 
-const CategoryPage = () => {
-  const { name } = useParams();
-
-  const filteredNews = newsData.filter(
-    item => item.category.toLowerCase() === name.toLowerCase()
-  );
-
-  const categoryInfo = navItems.find(
-    item => item.label.toLowerCase() === name.toLowerCase()
-  );
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [name]);
-
-  const mainFeature = filteredNews[0];
-  const subFeatures = filteredNews.slice(1, 5);
-  const remainingNews = filteredNews.slice(5);
+const CategoryLayout = ({ name, icon: Icon, news = [] }) => {
+  const mainFeature = news[0];
+  const subFeatures = news.slice(1, 5);
+  const remainingNews = news.slice(5);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6 md:space-y-10 bg-white min-h-screen font-sans overflow-x-hidden">
       
-      {/* 1. DYNAMIC HEADER - Stacks on Mobile */}
+      {/* HEADER */}
       <header className="border-b border-slate-100 pb-6 md:pb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
         <div>
           <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em]">
@@ -35,7 +19,7 @@ const CategoryPage = () => {
           </p>
           <div className="flex items-center gap-3 md:gap-5 mt-4">
              <div className="p-2 md:p-3 bg-slate-900 text-white rounded-xl shadow-lg">
-               {categoryInfo && <categoryInfo.icon size={24} strokeWidth={2.5} />}
+               {Icon && <Icon size={24} strokeWidth={2.5} />}
              </div>
              <h1 className="text-3xl md:text-5xl font-black text-slate-900 capitalize tracking-tighter italic leading-none">
                {name} <span className="text-blue-600">Pulse</span>
@@ -43,7 +27,6 @@ const CategoryPage = () => {
           </div>
         </div>
 
-        {/* WIDGET 1: Hidden on smaller mobile, shown on Tablet/Desktop */}
         <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-100 w-fit">
            <div className="flex items-center gap-2 pr-4 border-r border-slate-200">
               <CloudSun className="text-yellow-500" size={18} />
@@ -62,11 +45,10 @@ const CategoryPage = () => {
         </div>
       </header>
 
-      {filteredNews.length > 0 ? (
+      {news.length > 0 ? (
         <>
-          {/* 2. BENTO MOSAIC - Stacks on Mobile */}
+          {/* BENTO GRID */}
           <section className="grid grid-cols-1 lg:grid-cols-4 gap-1 rounded-xl md:rounded-[2rem] overflow-hidden shadow-xl border border-slate-100">
-            {/* BIG FEATURE */}
             {mainFeature && (
               <div className="lg:col-span-2 relative h-[250px] md:h-[480px] overflow-hidden group">
                 <img src={mainFeature.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt="Main" />
@@ -77,42 +59,35 @@ const CategoryPage = () => {
               </div>
             )}
             
-            {/* 4 SUB-FEATURES - 2x2 on Mobile */}
             <div className="lg:col-span-2 grid grid-cols-2 gap-1 h-[250px] md:h-[480px]">
-              {subFeatures.map((news) => (
-                <div key={news.id} className="relative overflow-hidden group">
-                  <img src={news.image} className="w-full h-full object-cover" alt="Sub" />
+              {subFeatures.map((item) => (
+                <div key={item.id} className="relative overflow-hidden group">
+                  <img src={item.image} className="w-full h-full object-cover" alt="Sub" />
                   <div className="absolute inset-0 bg-black/50 flex flex-col justify-end p-3 text-white text-center">
-                    <h3 className="text-[9px] md:text-[11px] font-black uppercase italic leading-tight">{news.title}</h3>
+                    <h3 className="text-[9px] md:text-[11px] font-black uppercase italic leading-tight">{item.title}</h3>
                   </div>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* 3. LIST FEED + SIDEBAR - Stacks on Mobile */}
+          {/* LIST FEED + SIDEBAR */}
           <section className="flex flex-col lg:grid lg:grid-cols-12 gap-8 md:gap-12 pt-6 md:pt-12">
-            
-            {/* Main Article List */}
             <div className="lg:col-span-8 space-y-10 md:space-y-16">
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-x-10 md:gap-y-16">
-                {remainingNews.map((news) => (
-                  <div key={news.id} className="space-y-4 group cursor-pointer">
+                {remainingNews.map((item) => (
+                  <div key={item.id} className="space-y-4 group cursor-pointer">
                     <div className="aspect-[16/10] overflow-hidden rounded-xl md:rounded-[1.5rem] shadow-sm">
-                      <img src={news.image} className="w-full h-full object-cover" alt={news.title} />
+                      <img src={item.image} className="w-full h-full object-cover" alt={item.title} />
                     </div>
-                    <h3 className="text-lg md:text-xl font-black text-slate-900 leading-tight uppercase italic tracking-tighter">
-                      {news.title}
-                    </h3>
-                    <p className="text-slate-500 text-xs md:text-sm line-clamp-2">{news.excerpt}</p>
+                    <h3 className="text-lg md:text-xl font-black text-slate-900 leading-tight uppercase italic tracking-tighter">{item.title}</h3>
+                    <p className="text-slate-500 text-xs md:text-sm line-clamp-2">{item.excerpt}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* SIDEBAR - Moves to bottom on Mobile */}
             <aside className="lg:col-span-4 space-y-10 md:space-y-14">
-              
               <div>
                 <h4 className="font-black text-slate-900 uppercase italic border-b-4 border-red-600 inline-block mb-6 tracking-tighter">Follow Us</h4>
                 <SocialStats />
@@ -125,23 +100,18 @@ const CategoryPage = () => {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {["#Hyderabad", "#Stocks", "#AI", "#Tech"].map(tag => (
-                    <span key={tag} className="px-2 py-1 bg-white/20 rounded-full text-[9px] font-bold">
-                      {tag}
-                    </span>
+                    <span key={tag} className="px-2 py-1 bg-white/20 rounded-full text-[9px] font-bold">{tag}</span>
                   ))}
                 </div>
               </div>
 
-              {/* Numbered List - Simple list on Mobile */}
               <div className="bg-slate-900 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-white">
                 <h4 className="font-black uppercase italic border-b-4 border-yellow-500 inline-block mb-6 tracking-tighter">Most Read</h4>
                 <div className="space-y-6">
-                  {filteredNews.slice(0, 3).map((news, idx) => (
-                    <div key={news.id} className="flex gap-3 group">
+                  {news.slice(0, 3).map((item, idx) => (
+                    <div key={item.id} className="flex gap-3 group">
                       <span className="text-2xl font-black text-slate-700">0{idx + 1}</span>
-                      <h5 className="text-[10px] font-black uppercase italic leading-tight group-hover:text-blue-400 transition-colors">
-                        {news.title}
-                      </h5>
+                      <h5 className="text-[10px] font-black uppercase italic leading-tight group-hover:text-blue-400 transition-colors">{item.title}</h5>
                     </div>
                   ))}
                 </div>
@@ -151,7 +121,7 @@ const CategoryPage = () => {
         </>
       ) : (
         <div className="text-center py-20 bg-slate-50 rounded-3xl border-4 border-dashed border-slate-100">
-          <h2 className="text-slate-300 font-black text-4xl uppercase italic opacity-30">No Data</h2>
+          <h2 className="text-slate-300 font-black text-4xl uppercase italic opacity-30">No News in {name}</h2>
           <Link to="/" className="mt-6 inline-block bg-slate-900 text-white px-6 py-3 rounded-full text-[10px] font-black uppercase">Return Home</Link>
         </div>
       )}
@@ -159,4 +129,4 @@ const CategoryPage = () => {
   );
 };
 
-export default CategoryPage;
+export default CategoryLayout;

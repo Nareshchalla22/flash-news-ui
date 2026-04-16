@@ -1,19 +1,34 @@
 import './App.css'
 import { Routes, Route } from 'react-router-dom'
-import Navbar from './Navbar/navbar' 
-import Ticker from './Ticker/Ticker'
+import Navbar from './Navbar/navbar'
+import Ticker from './components/Pages/Ticker/Ticker'
 import Header from './Header/Header'
-import BottomNav from './Bottom/BottomNav' 
-import { useNavbar } from './Navbar/useNavbar' 
+import BottomNav from './Bottom/BottomNav'
+import { useNavbar } from './Navbar/useNavbar'
 import Footer from './Footer/Footer'
+
+// --- 1. CORE PAGES ---
 import Home from './components/Pages/Home'
-import CategoryPage from './components/Pages/categories/CategoryPage'
+import CategoryPage from './components/shared/CategoryLayout'
+
+// --- 2. CATEGORY PAGES (IMPORT ALL) ---
+import GlobalPage from './components/Pages/category/GlobalPage';
+import NationalPage from './components/Pages/category/NationalPage';
+import StatePage from './components/Pages/category/StatePage';
+import BusinessPage from './components/Pages/category/BusinessPage';
+import CrimePage from './components/Pages/category/CrimePage';
+import EntertainmentPage from './components/Pages/category/EntertainmentPage';
+import SportsPage from './components/Pages/category/SportsPage';
+import HealthPage from './components/Pages/category/HealthPage';
+import PoliticsPage from './components/Pages/category/PoliticsPage';
+import TravelPage from './components/Pages/category/TravelPage';
+import TrendingPage from './components/Pages/category/TrendingPage';
+import LiveTVPage from './components/Pages/category/LiveTVPage';
+import UpdateNews from './components/Pages/Form/UpdateNews'
+import TickerManager from './components/Pages/Ticker/TickerManager'
 
 function App() {
   const { isExpanded, isMobile } = useNavbar();
-
-  // Remove the "if(isMobile) return null;" from here!
-
   const breakingNews = "FLASHREPORT: Hyderabad Tech Corridor to see 50,000 new jobs by December 2026!";
 
   return (
@@ -25,25 +40,43 @@ function App() {
       </div>
 
       <div className="flex flex-1 relative">
-        {/* 2. SIDEBAR: Updated to hide strictly on mobile */}
+        {/* 2. SIDEBAR */}
         {!isMobile && <Navbar />}
 
         {/* 3. MAIN CONTENT AREA */}
-        <div 
+        <div
           className={`flex flex-col flex-1 min-w-0 transition-all duration-300 ease-in-out
-            /* Desktop: Adjust margin based on sidebar state */
             ${!isMobile ? (isExpanded ? 'ml-64' : 'ml-20') : 'ml-0'}
-            /* Mobile/Laptop: Room for BottomNav */
             pb-20 md:pb-24
           `}
         >
-          {/* Main Routing Area */}
           <main className="flex-1 p-4 md:p-8 max-w-[1600px] mx-auto w-full">
             <Routes>
+              {/* Main Landing */}
               <Route path="/" element={<Home />} />
-              <Route path="/category/:name" element={<CategoryPage />} />
-              <Route path="/live-tv" element={<div className="p-20 text-center font-black italic text-2xl">LIVE STREAMING...</div>} />
+
+              {/* Category Routes - Clean & Unique */}
+              <Route path="/global" element={<GlobalPage />} />
+              <Route path="/national" element={<NationalPage />} />
+              <Route path="/state" element={<StatePage />} />
+              <Route path="/business" element={<BusinessPage />} />
+              <Route path="/crime" element={<CrimePage />} />
+              <Route path="/entertainment" element={<EntertainmentPage />} />
+              <Route path="/sports" element={<SportsPage />} />
+              <Route path="/health" element={<HealthPage />} />
+              <Route path="/category/:name" element={<PoliticsPage />} />
+              <Route path="/travel" element={<TravelPage />} />
+              <Route path="/trending" element={<TrendingPage />} />
+              <Route path="/livetv" element={<LiveTVPage />} />
+
+              <Route path="/update-data" element={<UpdateNews />} />
+
+              {/* Special Tools */}
               <Route path="/id-card" element={<div className="p-20 text-center font-black italic text-2xl">GENERATE PRESS PASS</div>} />
+
+              {/* Fallback for Dynamic Category Logic (Optional) */}
+              <Route path="/category/:name" element={<CategoryPage />} />
+              <Route path="/ticker-control" element={<TickerManager />} />
             </Routes>
           </main>
 
@@ -51,7 +84,6 @@ function App() {
         </div>
       </div>
 
-      {/* 4. NAVIGATION BAR: Always at the bottom */}
       <BottomNav />
     </div>
   )

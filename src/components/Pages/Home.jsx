@@ -5,6 +5,7 @@ import SocialStats from '../Stats/SocialStats';
 import { navItems } from '../../Navbar/navdata';
 import { newsData } from '../Data/newsdata';
 
+
 const Home = () => {
   const sections = navItems.filter(item => 
     !['Home', 'Admin', 'Live TV', 'ID Card', 'Contact'].includes(item.label)
