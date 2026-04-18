@@ -19,20 +19,22 @@ const Navbar = () => {
     
 
       
-      {/* Logo Section */}
-      <div className="flex items-center justify-between p-6 h-[80px] border-b border-blue-800 bg-slate-900/50 backdrop-blur-md">
+      {/* Logo & Toggler Section: 
+          Added mt-[110px] to push the toggler out from behind the AP13 header
+      */}
+      <div className="flex items-center justify-between p-6 h-[80px] border-b border-slate-800 bg-slate-900/50 backdrop-blur-md mt-[110px]">
         <div className="flex items-center gap-2">
           <Zap className="text-blue-500 fill-blue-500" size={20} />
           {isExpanded && (
             <span className="font-black text-white text-lg uppercase italic tracking-tighter">
-              FlashReport
+              AP13 News
             </span>
           )}
         </div>
         
         <button 
           onClick={toggleNavbar} 
-          className="text-slate-500 hover:text-white ml-auto transition-colors mt-4"
+          className="text-slate-500 hover:text-white ml-auto transition-colors p-2 hover:bg-slate-800 rounded-lg"
         >
           {isExpanded ? <X size={20} /> : <Menu size={20} />}
         </button>

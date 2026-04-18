@@ -9,7 +9,7 @@ const BottomNav = () => {
 
     return (
         /* Changed 'fixed' to 'sticky' */
-        <nav className="sticky bottom-0 left-0 right-0 w-full bg-slate-950/95 backdrop-blur-md text-white border-t border-slate-800 z-[100] pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+        <nav className="fixed bottom-0 left-0 right-0 w-full bg-slate-950/95 backdrop-blur-md text-white border-t border-slate-800 z-[100] pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
             <div className="max-w-4xl mx-auto flex justify-around items-center h-16 md:h-20 px-2">
                 {menuItems.map((item) => {
                     const isCenter = item.label === 'Trending';
