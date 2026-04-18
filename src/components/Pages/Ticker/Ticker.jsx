@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { newsService } from '../../../services/api';
+import {tickerService } from '../../../services/api';
 
 const Ticker = () => {
   const [scrollingText, setScrollingText] = useState("Loading Live Feed...");
 
   const fetchDisplayData = async () => {
     try {
-      const res = await newsService.getTicker();
+      const res = await tickerService.getTicker();
       // Filter for items where isActive OR active is true
       const activeMsgs = res.data
         .filter(t => t.active === true || t.isActive === true)

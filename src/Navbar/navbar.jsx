@@ -16,9 +16,11 @@ const Navbar = () => {
       transition-all duration-300 ease-in-out shadow-2xl border-r border-slate-800
       ${isExpanded ? 'w-64' : 'w-20'}
     `}>
+    
+
       
       {/* Logo Section */}
-      <div className="flex items-center justify-between p-6 h-[80px] border-b border-slate-800 bg-slate-900/50 backdrop-blur-md">
+      <div className="flex items-center justify-between p-6 h-[80px] border-b border-blue-800 bg-slate-900/50 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <Zap className="text-blue-500 fill-blue-500" size={20} />
           {isExpanded && (
@@ -30,7 +32,7 @@ const Navbar = () => {
         
         <button 
           onClick={toggleNavbar} 
-          className="text-slate-500 hover:text-white ml-auto transition-colors"
+          className="text-slate-500 hover:text-white ml-auto transition-colors mt-4"
         >
           {isExpanded ? <X size={20} /> : <Menu size={20} />}
         </button>

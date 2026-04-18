@@ -26,7 +26,7 @@ const CategoryLayout = ({ name, icon: Icon, news = [] }) => {
              </h1>
           </div>
         </div>
-
+        {/* WEATHER & STOCK WIDGET */}
         <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-100 w-fit">
            <div className="flex items-center gap-2 pr-4 border-r border-slate-200">
               <CloudSun className="text-yellow-500" size={18} />

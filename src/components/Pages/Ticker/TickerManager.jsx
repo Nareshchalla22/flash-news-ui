@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Edit3, Save, PlusCircle } from 'lucide-react';
-import { newsService } from '../../../services/api';
+import { newsService, tickerService } from '../../../services/api';
 
 const TickerManager = () => {
   const [tickers, setTickers] = useState([]);
@@ -13,7 +13,7 @@ const TickerManager = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const res = await newsService.getTicker();
+      const res = await tickerService.getTicker();
       // Ensure we always have an array even if the backend is empty
       setTickers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
@@ -48,7 +48,7 @@ const TickerManager = () => {
       alert("Flash Headline Posted Live!");
     } catch (err) {
       console.error("Post Error:", err);
-      alert("Post Failed - Check Java Console and CORS settings");
+      alert("Post Failed - Check Java Console and CORS settings",err);
     }
   };
 

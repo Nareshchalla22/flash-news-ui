@@ -1,41 +1,39 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api/ticker'; // Base URL for all news-related endpoints
+const API_BASE_URL = 'http://localhost:8080/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
 });
 
+// --- 1. CATEGORY NEWS SERVICE ---
 export const newsService = {
+  // Fetch news for any category (global, national, sports, etc.)
+  getCategoryNews: (category) => apiClient.get(`/${category}`),
   
-  // 1. Fetch specific category news 
-  // Changed from `/news/${category}` to `/${category}` to match your Controller
-  getCategoryNews: (category) => apiClient.get(`/${category}`), // Cache-busting with timestamp
-
-  // 2. Fetch a SINGLE news item by ID (Required for the Update Form)
+  // Single item operations
   getSingleNews: (category, id) => apiClient.get(`/${category}/${id}`),
-
-  // 3. Update an existing news item (The "Update Data" logic)
-  updateNews: (category, id, data) => apiClient.put(`/${category}/${id}`, data),
-
-  // 4. Post new news (For your future Admin post form)
   postNews: (category, data) => apiClient.post(`/${category}`, data),
+  updateNews: (category, id, data) => apiClient.put(`/${category}/${id}`, data),
+};
 
-  // --- Other Services ---
-  getNavigation: () => apiClient.get('/categories'),
+// --- 2. TICKER & BREAKING NEWS SERVICE ---
+export const tickerService = {
+  // Matches @GetMapping("/all")
+  getAll: () => apiClient.get('/all'),
+   getTicker:() => apiClient.get('/all'),
+  
+  // Matches @PostMapping("/ticker")
+  create: (data) => apiClient.post('/create', data),
+  
+  // Matches @PutMapping("/update/{id}")
+  update: (id, data) => apiClient.put(`/update/${id}`, data),
+};
 
+// --- 3. MEDIA & SYSTEM SERVICE ---
+export const systemService = {
   getLiveTv: () => apiClient.get('/livetv'),
+  getNavigation: () => apiClient.get('/categories'),
   getPressPass: () => apiClient.get('/press-pass'),
-
- // Fetch only active ones for display
-  getTicker: () => apiClient.get('/all'), 
-  // Fetch all for the Admin Manager
-  getAllTickers: () => apiClient.get('/ticker/all'), 
-  // POST new message
-  createTicker: (data) => apiClient.post('/ticker', data),
-  // UPDATE existing message
-  updateTicker: (id, data) => apiClient.put(`/ticker/update/${id}`, data)
 };

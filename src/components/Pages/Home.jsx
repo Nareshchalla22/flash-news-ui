@@ -1,94 +1,128 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CricketTicker from '../Stats/CricketTicker';
 import SocialStats from '../Stats/SocialStats';
 import { navItems } from '../../Navbar/navdata';
-import { newsData } from '../Data/newsdata';
-
+import { newsService } from '../../services/api';
 
 const Home = () => {
-  const sections = navItems.filter(item => 
-    !['Home', 'Admin', 'Live TV', 'ID Card', 'Contact'].includes(item.label)
+  const [categoryNews, setCategoryNews] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  // 1. Define categories that should have a Bento Grid on Home
+  const activeSections = navItems.filter(item => 
+    ['Global', 'National', 'Business', 'Sports', 'Entertainment', 'Health','Politics','Crime'].includes(item.label)
+  );
+
+  // 2. The Real-Time Fetch Logic
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        const newsMap = {};
+        
+        // Concurrent fetching for performance
+        await Promise.all(activeSections.map(async (cat) => {
+          const endpoint = cat.label.toLowerCase(); // matches Java @GetMapping("/sports")
+          const res = await newsService.getCategoryNews(endpoint);
+          
+          // Store result; default to empty array if no data exists
+          newsMap[cat.label] = Array.isArray(res.data) ? res.data.slice(0, 5) : [];
+        }));
+
+        setCategoryNews(newsMap);
+        setLoading(false);
+      } catch (err) {
+        console.error("AP13 Network Sync Failed:", err);
+        setLoading(false);
+      }
+    };
+
+    fetchAllData();
+  }, []);
+
+  if (loading) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950">
+      <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p className="text-red-600 font-black italic tracking-[0.3em] animate-pulse">SYNCING LIVE FEED...</p>
+    </div>
   );
 
   return (
-    /* Use w-screen and overflow-x-hidden to lock the width to the phone screen */
     <div className="w-full max-w-full overflow-x-hidden px-4 md:px-8 pb-24 space-y-10 md:space-y-16">
       
-      {/* 1. TICKER: Wrap in a container that prevents it from stretching the page */}
-      <div className="w-full max-w-full overflow-hidden">
+      {/* --- SECTION 1: CRICKET TICKER --- */}
+      <div className="w-full overflow-hidden rounded-xl shadow-lg">
         <CricketTicker />
       </div>
 
-      {/* 2. HERO SECTION: Force Flex-Col on Mobile */}
+      {/* --- SECTION 2: HERO SECTION --- */}
       <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:gap-10">
-        
-        {/* Main Feature: Responsive Height */}
-        <div className="w-full lg:col-span-8 relative h-[300px] md:h-[500px] rounded-[2rem] overflow-hidden group shadow-2xl">
+        <div className="w-full lg:col-span-8 relative h-[350px] md:h-[550px] rounded-[2.5rem] overflow-hidden group shadow-2xl border border-slate-800">
           <img 
             src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070" 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3000ms]" 
             alt="Main Story"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent p-6 md:p-12 flex flex-col justify-end">
-            <span className="bg-red-600 text-white px-3 py-1 rounded-full text-[9px] font-black w-fit mb-4 uppercase tracking-widest">Trending Now</span>
-            <h2 className="text-white text-xl md:text-5xl font-black leading-tight italic uppercase tracking-tighter drop-shadow-2xl break-words">
-              FlashReport: India's Tech Hub Expansion Creates 50,000 New Jobs
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent p-6 md:p-12 flex flex-col justify-end">
+            <span className="bg-red-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 w-fit shadow-lg">Trending</span>
+            <h2 className="text-white text-3xl md:text-6xl font-[1000] italic uppercase tracking-tighter transform -skew-x-6 drop-shadow-2xl">
+              AP13 Exclusive: Real-Time Intelligence Now Live
             </h2>
           </div>
         </div>
 
-        {/* Sidebar: Now stacks underneath the hero on mobile */}
+        {/* Sidebar */}
         <div className="w-full lg:col-span-4 flex flex-col gap-6">
-          <div className="border-l-4 border-blue-600 pl-4">
-            <h3 className="text-xs md:text-sm font-black uppercase italic text-slate-800 tracking-tighter">Stay Connected</h3>
+          <div className="border-l-8 border-red-600 pl-4">
+            <h3 className="text-sm font-black uppercase italic text-slate-900 tracking-tighter">Stay Connected</h3>
           </div>
+          <SocialStats />
           
-          {/* Ensure SocialStats is responsive internally */}
-          <div className="w-full max-w-full overflow-hidden">
-            <SocialStats />
-          </div>
-          
-          <div className="bg-slate-900 p-8 rounded-[2rem] text-white shadow-xl">
-             <h4 className="font-bold text-lg italic uppercase mb-3 text-blue-500">Flash Digest</h4>
-             <p className="text-xs text-slate-400 mb-6 leading-relaxed">The only news you need to start your day.</p>
-             <button className="w-full bg-blue-600 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all">Subscribe</button>
+          {/* YouTube Card */}
+          <div className="bg-slate-950 p-8 rounded-[2.5rem] text-white shadow-2xl border border-slate-900 relative overflow-hidden group">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-600/10 rounded-full blur-3xl" />
+            <h4 className="font-black text-2xl italic uppercase mb-2">AP13 <span className="text-red-600">Live</span></h4>
+            <a href="https://www.youtube.com/@ap13news?sub_confirmation=1" target="_blank" rel="noreferrer" className="block w-full">
+              <button className="w-full bg-red-600 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-white hover:text-red-600 transition-all active:scale-95">
+                Subscribe YouTube
+              </button>
+            </a>
           </div>
         </div>
       </div>
 
-      {/* 3. DYNAMIC SECTIONS: Forced stacking */}
-      <div className="space-y-16 md:space-y-28">
-        {sections.map((cat) => {
-          const sectionNews = newsData.filter(n => n.category.toLowerCase() === cat.label.toLowerCase()).slice(0, 5);
+      {/* --- SECTION 3: DYNAMIC BENTO GRIDS (Real Data) --- */}
+      <div className="space-y-24">
+        {activeSections.map((cat) => {
+          const sectionNews = categoryNews[cat.label] || [];
           if (sectionNews.length === 0) return null;
 
           return (
-            <section key={cat.label} className="w-full max-w-full overflow-hidden">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-slate-900 text-white rounded-xl shadow-lg"><cat.icon size={20} /></div>
-                  <h2 className="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-slate-900 leading-none">{cat.label}</h2>
+            <section key={cat.label} className="w-full group">
+              <div className="flex items-center justify-between mb-8 border-b-2 border-slate-100 pb-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-red-600 text-white rounded-2xl shadow-xl transition-transform group-hover:rotate-12"><cat.icon size={24} /></div>
+                  <h2 className="text-3xl md:text-5xl font-[1000] italic uppercase tracking-tighter text-slate-950 leading-none">{cat.label}</h2>
                 </div>
-                <Link to={`/category/${cat.label.toLowerCase()}`} className="text-[10px] font-black uppercase text-blue-600 hover:text-red-600 transition-colors">View All →</Link>
+                <Link to={`/category/${cat.label.toLowerCase()}`} className="px-6 py-2 rounded-full border-2 border-slate-200 text-[10px] font-black uppercase text-slate-400 hover:bg-red-600 hover:text-white transition-all">Explore All →</Link>
               </div>
 
-              {/* Bento Grid: 1 column on mobile, 4 on Desktop */}
-              <div className="flex flex-col lg:grid lg:grid-cols-4 gap-2 rounded-[2rem] overflow-hidden shadow-sm border border-slate-50">
-                <Link to={`/category/${cat.label.toLowerCase()}`} className="lg:col-span-2 relative h-[250px] md:h-[400px] overflow-hidden group">
-                  <img src={sectionNews[0]?.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="main" />
-                  <div className="absolute inset-0 bg-black/40 p-6 flex flex-col justify-end text-white">
-                    <h3 className="text-lg md:text-2xl font-black uppercase italic leading-tight">{sectionNews[0]?.title}</h3>
+              <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4 md:gap-6">
+                {/* Large Bento Post */}
+                <Link to={`/category/${cat.label.toLowerCase()}`} className="lg:col-span-2 relative h-[300px] md:h-[500px] rounded-[2rem] overflow-hidden group shadow-xl">
+                  <img src={sectionNews[0]?.image} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" alt="main" />
+                  <div className="absolute inset-0 bg-black/40 p-8 flex flex-col justify-end">
+                    <h3 className="text-white text-xl md:text-3xl font-black uppercase italic leading-none">{sectionNews[0]?.title}</h3>
                   </div>
                 </Link>
 
-                <div className="lg:col-span-2 grid grid-cols-2 gap-2 h-[250px] md:h-[400px]">
+                {/* Sub Grid Posts */}
+                <div className="lg:col-span-2 grid grid-cols-2 gap-4 md:gap-6">
                   {sectionNews.slice(1, 5).map((news, idx) => (
-                    <Link key={idx} to={`/category/${cat.label.toLowerCase()}`} className="relative h-full overflow-hidden group">
-                      <img src={news.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="sub" />
-                      <div className="absolute inset-0 bg-black/50 p-3 flex flex-col justify-end">
-                        <h4 className="text-white text-[9px] md:text-[11px] font-black uppercase italic leading-tight line-clamp-2 group-hover:underline">{news.title}</h4>
+                    <Link key={idx} to={`/category/${cat.label.toLowerCase()}`} className="relative h-[140px] md:h-[240px] rounded-[1.5rem] overflow-hidden group shadow-lg">
+                      <img src={news.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="sub" />
+                      <div className="absolute inset-0 bg-black/60 p-4 flex flex-col justify-end group-hover:bg-red-600/40 transition-colors">
+                        <h4 className="text-white text-[10px] md:text-sm font-black uppercase italic leading-tight line-clamp-3">{news.title}</h4>
                       </div>
                     </Link>
                   ))}
