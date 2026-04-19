@@ -61,14 +61,14 @@ function App() {
                 <Route path="/health" element={<HealthPage />} />
 
                 {/* Check if your Navbar uses /politics or /political */}
-                <Route path="/category/:name" element={<PoliticsPage />} />
+                {/* <Route path="/category/:name" element={<PoliticsPage />} /> */}
                 <Route path="/political" element={<PoliticsPage />} />
 
                 <Route path="/travel" element={<TravelPage />} />
                 <Route path="/trending" element={<TrendingPage />} />
                 <Route path="/livetv" element={<LiveTVPage />} />
                 <Route path="/update-data" element={<UpdateNews />} />
-                <Route path="/ticker-control" element={<TickerManager />} />
+                <Route path="/ticker" element={<TickerManager />} />
 
                 <Route path="/id-card" element={<div className="p-20 text-center font-black italic text-2xl uppercase">Generate Press Pass</div>} />
 
