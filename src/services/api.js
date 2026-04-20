@@ -28,9 +28,9 @@ export const newsService = {
 // --- TICKER ---
 export const tickerService = {
   // Notice we removed the leading '/' because it's handled by baseURL
-  getAll: () => apiClient.get('api/ticker/all'),
-  create: (payload) => apiClient.post('api/ticker/create', payload),
-  update: (id, payload) => apiClient.put(`api/ticker/update/${id}`, payload),
+  getAll: () => apiClient.get('api/all'),
+  create: (payload) => apiClient.post('api/create', payload),
+  update: (id, payload) => apiClient.put(`api/update/${id}`, payload),
 };
 
 // --- SYSTEM ---
