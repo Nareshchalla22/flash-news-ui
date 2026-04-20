@@ -26,6 +26,7 @@ const CategoryLayout = ({ name, icon: Icon, news = [] }) => {
              </h1>
           </div>
         </div>
+
         {/* WEATHER & STOCK WIDGET */}
         <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-100 w-fit">
            <div className="flex items-center gap-2 pr-4 border-r border-slate-200">
@@ -47,14 +48,19 @@ const CategoryLayout = ({ name, icon: Icon, news = [] }) => {
 
       {news.length > 0 ? (
         <>
-          {/* BENTO GRID */}
+          {/* BENTO GRID (Corrected field names) */}
           <section className="grid grid-cols-1 lg:grid-cols-4 gap-1 rounded-xl md:rounded-[2rem] overflow-hidden shadow-xl border border-slate-100">
             {mainFeature && (
               <div className="lg:col-span-2 relative h-[250px] md:h-[480px] overflow-hidden group">
-                <img src={mainFeature.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt="Main" />
+                {/* Changed .image to .imageUrl */}
+                <img 
+                  src={mainFeature.imageUrl || 'https://via.placeholder.com/800x500'} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
+                  alt="Main" 
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-5 md:p-10 text-white">
-                   <span className="bg-red-600 w-fit px-2 py-0.5 text-[8px] font-black uppercase mb-2">Featured</span>
-                   <h2 className="text-xl md:text-3xl font-black italic uppercase tracking-tighter">{mainFeature.title}</h2>
+                    <span className="bg-red-600 w-fit px-2 py-0.5 text-[8px] font-black uppercase mb-2">Featured</span>
+                    <h2 className="text-xl md:text-3xl font-black italic uppercase tracking-tighter">{mainFeature.title}</h2>
                 </div>
               </div>
             )}
@@ -62,7 +68,8 @@ const CategoryLayout = ({ name, icon: Icon, news = [] }) => {
             <div className="lg:col-span-2 grid grid-cols-2 gap-1 h-[250px] md:h-[480px]">
               {subFeatures.map((item) => (
                 <div key={item.id} className="relative overflow-hidden group">
-                  <img src={item.image} className="w-full h-full object-cover" alt="Sub" />
+                  {/* Changed .image to .imageUrl */}
+                  <img src={item.imageUrl || 'https://via.placeholder.com/400x300'} className="w-full h-full object-cover" alt="Sub" />
                   <div className="absolute inset-0 bg-black/50 flex flex-col justify-end p-3 text-white text-center">
                     <h3 className="text-[9px] md:text-[11px] font-black uppercase italic leading-tight">{item.title}</h3>
                   </div>
@@ -77,11 +84,13 @@ const CategoryLayout = ({ name, icon: Icon, news = [] }) => {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-x-10 md:gap-y-16">
                 {remainingNews.map((item) => (
                   <div key={item.id} className="space-y-4 group cursor-pointer">
-                    <div className="aspect-[16/10] overflow-hidden rounded-xl md:rounded-[1.5rem] shadow-sm">
-                      <img src={item.image} className="w-full h-full object-cover" alt={item.title} />
+                    <div className="aspect-[16/10] overflow-hidden rounded-xl md:rounded-[1.5rem] shadow-sm bg-slate-100">
+                      {/* Changed .image to .imageUrl */}
+                      <img src={item.imageUrl || 'https://via.placeholder.com/400x300'} className="w-full h-full object-cover" alt={item.title} />
                     </div>
                     <h3 className="text-lg md:text-xl font-black text-slate-900 leading-tight uppercase italic tracking-tighter">{item.title}</h3>
-                    <p className="text-slate-500 text-xs md:text-sm line-clamp-2">{item.excerpt}</p>
+                    {/* Changed .excerpt to .description (matches your Java Model) */}
+                    <p className="text-slate-500 text-xs md:text-sm line-clamp-2">{item.description}</p>
                   </div>
                 ))}
               </div>

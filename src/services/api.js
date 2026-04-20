@@ -1,7 +1,10 @@
 import axios from 'axios';
+const isLocal = window.location.hostname === 'localhost';
 
 const apiClient = axios.create({
-  baseURL: 'https://apnews.onrender.com/api',
+  baseURL: isLocal 
+    ? 'http://localhost:8080/api' 
+    : 'https://apnews.onrender.com/api',
   headers: { 'Content-Type': 'application/json' },
 });
 

@@ -9,23 +9,22 @@ const Home = () => {
   const [categoryNews, setCategoryNews] = useState({});
   const [loading, setLoading] = useState(true);
 
-  // 1. Define categories that should have a Bento Grid on Home
+  // 1. Define active sections
   const activeSections = navItems.filter(item => 
     ['Global', 'National', 'Business', 'Sports', 'Entertainment', 'Health','Politics','Crime'].includes(item.label)
   );
 
-  // 2. The Real-Time Fetch Logic
+  // 2. Fetch Logic
   useEffect(() => {
     const fetchAllData = async () => {
       try {
         const newsMap = {};
         
-        // Concurrent fetching for performance
         await Promise.all(activeSections.map(async (cat) => {
-          const endpoint = cat.label.toLowerCase(); // matches Java @GetMapping("/sports")
+          const endpoint = cat.label.toLowerCase(); 
           const res = await newsService.getCategoryNews(endpoint);
           
-          // Store result; default to empty array if no data exists
+          // Ensure we match the backend data structure
           newsMap[cat.label] = Array.isArray(res.data) ? res.data.slice(0, 5) : [];
         }));
 
@@ -50,12 +49,12 @@ const Home = () => {
   return (
     <div className="w-full max-w-full overflow-x-hidden px-4 md:px-8 pb-24 space-y-10 md:space-y-16">
       
-      {/* --- SECTION 1: CRICKET TICKER --- */}
+      {/* SECTION 1: CRICKET TICKER */}
       <div className="w-full overflow-hidden rounded-xl shadow-lg">
         <CricketTicker />
       </div>
 
-      {/* --- SECTION 2: HERO SECTION --- */}
+      {/* SECTION 2: HERO SECTION */}
       <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:gap-10">
         <div className="w-full lg:col-span-8 relative h-[350px] md:h-[550px] rounded-[2.5rem] overflow-hidden group shadow-2xl border border-slate-800">
           <img 
@@ -78,11 +77,10 @@ const Home = () => {
           </div>
           <SocialStats />
           
-          {/* YouTube Card */}
           <div className="bg-slate-950 p-8 rounded-[2.5rem] text-white shadow-2xl border border-slate-900 relative overflow-hidden group">
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-600/10 rounded-full blur-3xl" />
             <h4 className="font-black text-2xl italic uppercase mb-2">AP13 <span className="text-red-600">Live</span></h4>
-            <a href="https://www.youtube.com/@ap13news?sub_confirmation=1" target="_blank" rel="noreferrer" className="block w-full">
+            <a href="https://www.youtube.com/@ap13news" target="_blank" rel="noreferrer" className="block w-full">
               <button className="w-full bg-red-600 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-white hover:text-red-600 transition-all active:scale-95">
                 Subscribe YouTube
               </button>
@@ -91,7 +89,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* --- SECTION 3: DYNAMIC BENTO GRIDS (Real Data) --- */}
+      {/* SECTION 3: DYNAMIC BENTO GRIDS */}
       <div className="space-y-24">
         {activeSections.map((cat) => {
           const sectionNews = categoryNews[cat.label] || [];
@@ -99,34 +97,58 @@ const Home = () => {
 
           return (
             <section key={cat.label} className="w-full group">
+              {/* Category Header */}
               <div className="flex items-center justify-between mb-8 border-b-2 border-slate-100 pb-6">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-red-600 text-white rounded-2xl shadow-xl transition-transform group-hover:rotate-12"><cat.icon size={24} /></div>
-                  <h2 className="text-3xl md:text-5xl font-[1000] italic uppercase tracking-tighter text-slate-950 leading-none">{cat.label}</h2>
+                  <div className="p-3 bg-red-600 text-white rounded-2xl shadow-xl transition-transform group-hover:rotate-12">
+                    {cat.icon && <cat.icon size={24} />}
+                  </div>
+                  <h2 className="text-3xl md:text-5xl font-[1000] italic uppercase tracking-tighter text-slate-950 leading-none">
+                    {cat.label}
+                  </h2>
                 </div>
-                <Link to={`/category/${cat.label.toLowerCase()}`} className="px-6 py-2 rounded-full border-2 border-slate-200 text-[10px] font-black uppercase text-slate-400 hover:bg-red-600 hover:text-white transition-all">Explore All →</Link>
+                <Link to={`/category/${cat.label.toLowerCase()}`} className="px-6 py-2 rounded-full border-2 border-slate-200 text-[10px] font-black uppercase text-slate-400 hover:bg-red-600 hover:text-white transition-all">
+                  Explore All →
+                </Link>
               </div>
 
+              {/* Bento Grid Layout */}
               <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4 md:gap-6">
-                {/* Large Bento Post */}
-                <Link to={`/category/${cat.label.toLowerCase()}`} className="lg:col-span-2 relative h-[300px] md:h-[500px] rounded-[2rem] overflow-hidden group shadow-xl">
-                  <img src={sectionNews[0]?.image} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" alt="main" />
-                  <div className="absolute inset-0 bg-black/40 p-8 flex flex-col justify-end">
-                    <h3 className="text-white text-xl md:text-3xl font-black uppercase italic leading-none">{sectionNews[0]?.title}</h3>
+                
+                {/* 1. Large Main Bento Item */}
+                <Link to={`/category/${cat.label.toLowerCase()}`} className="lg:col-span-2 relative h-[300px] md:h-[500px] rounded-[2rem] overflow-hidden group shadow-xl bg-slate-100">
+                  <img 
+                    src={sectionNews[0]?.imageUrl || 'https://via.placeholder.com/800x500?text=No+Image'} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" 
+                    alt="main" 
+                    onError={(e) => { e.target.src = 'https://via.placeholder.com/800x500?text=AP13+News'; }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-8 flex flex-col justify-end">
+                    <h3 className="text-white text-xl md:text-3xl font-black uppercase italic leading-none line-clamp-2">
+                      {sectionNews[0]?.title}
+                    </h3>
                   </div>
                 </Link>
 
-                {/* Sub Grid Posts */}
+                {/* 2. Smaller Grid Items (Items 2-5) */}
                 <div className="lg:col-span-2 grid grid-cols-2 gap-4 md:gap-6">
                   {sectionNews.slice(1, 5).map((news, idx) => (
-                    <Link key={idx} to={`/category/${cat.label.toLowerCase()}`} className="relative h-[140px] md:h-[240px] rounded-[1.5rem] overflow-hidden group shadow-lg">
-                      <img src={news.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="sub" />
+                    <Link key={idx} to={`/category/${cat.label.toLowerCase()}`} className="relative h-[140px] md:h-[240px] rounded-[1.5rem] overflow-hidden group shadow-lg bg-slate-100">
+                      <img 
+                        src={news.imageUrl || 'https://via.placeholder.com/400x300?text=No+Image'} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                        alt="sub" 
+                        onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=AP13+News'; }}
+                      />
                       <div className="absolute inset-0 bg-black/60 p-4 flex flex-col justify-end group-hover:bg-red-600/40 transition-colors">
-                        <h4 className="text-white text-[10px] md:text-sm font-black uppercase italic leading-tight line-clamp-3">{news.title}</h4>
+                        <h4 className="text-white text-[10px] md:text-sm font-black uppercase italic leading-tight line-clamp-3">
+                          {news.title}
+                        </h4>
                       </div>
                     </Link>
                   ))}
                 </div>
+
               </div>
             </section>
           );
