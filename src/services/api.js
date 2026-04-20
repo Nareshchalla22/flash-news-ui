@@ -16,8 +16,8 @@ export const newsService = {
 // --- TICKER ---
 export const tickerService = {
   getAll: () => apiClient.get('/ticker/all'),
-  create: (data) => apiClient.post('/ticker/create', data),
-  update: (id, data) => apiClient.put(`/ticker/update/${id}`, data),
+  create: (payload) => apiClient.post('/ticker/create', payload),
+  update: (id, payload) => apiClient.put(`/ticker/update/${id}`, payload),
 };
 
 // --- SYSTEM ---
