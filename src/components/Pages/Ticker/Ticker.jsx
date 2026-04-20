@@ -6,7 +6,7 @@ const Ticker = () => {
 
   const fetchDisplayData = async () => {
     try {
-      const res = await tickerService.getTicker();
+      const res = await tickerService.getAll();
       // Filter for items where isActive OR active is true
       const activeMsgs = res.data
         .filter(t => t.active === true || t.isActive === true)
