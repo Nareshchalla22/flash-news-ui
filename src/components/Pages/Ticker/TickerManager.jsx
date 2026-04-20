@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Edit3, Database, Send, CheckCircle } from 'lucide-react';
-import { tickerService } from '../../../services/api'; // Use tickerService exclusively
+import React, { useState, useEffect } from 'react'; // Added useEffect import
+import { Edit3, Database, Send } from 'lucide-react';
+import { tickerService } from '../../../services/api'; 
 
 const TickerManager = () => {
   const [tickers, setTickers] = useState([]);
@@ -9,11 +9,11 @@ const TickerManager = () => {
   const [newMsg, setNewMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // 1. REUSABLE DATA LOADER
+  // --- 1. REUSABLE DATA LOADER ---
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const res = await tickerService.getTicker();
+      const res = await tickerService.getAll();
       setTickers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Fetch Error:", err);
@@ -22,45 +22,47 @@ const TickerManager = () => {
     }
   };
 
+  // --- 2. THE HOOK TO LOAD DATA ON START ---
   useEffect(() => {
     loadData();
   }, []);
 
-  // 2. POST NEW HEADLINE
+  // --- 3. POST NEW HEADLINE ---
   const handlePost = async () => {
     if (!newMsg.trim()) return;
     setIsLoading(true);
     try {
-      const payload = { 
-        message: newMsg, 
-        isActive: true, 
-        priority: "High" 
+      const payload = {
+        message: newMsg,
+        isActive: true,
+        priority: "High"
       };
-      await tickerService.createTicker(payload); // Fixed service reference
+      await tickerService.create(payload);
       setNewMsg("");
       await loadData();
     } catch (err) {
       console.error("Post Error:", err);
-      alert("Post Failed - Check if Backend URL includes /api");
+      alert("Post Failed - Check Backend Logs");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 3. UPDATE EXISTING
+  // --- 4. UPDATE EXISTING ---
   const handleSave = async (id) => {
     if (!tempMsg.trim()) return;
     setIsLoading(true);
     try {
-      await tickerService.updateTicker(id, { 
-        message: tempMsg, 
-        isActive: true, 
-        priority: "High" 
+      await tickerService.update(id, {
+        message: tempMsg,
+        isActive: true,
+        priority: "High"
       });
       setEditingId(null);
       await loadData();
     } catch (err) {
-      alert("Update Failed",err);
+      console.error("Update Error:", err);
+      alert("Update Failed");
     } finally {
       setIsLoading(false);
     }
@@ -70,12 +72,12 @@ const TickerManager = () => {
     <div className="max-w-4xl mx-auto p-6 space-y-8 mt-10">
       {/* HEADER SECTION */}
       <div className="flex items-center gap-4 mb-2">
-         <div className="p-3 bg-red-600 text-white rounded-2xl shadow-lg">
-            <Database size={24} className={isLoading ? 'animate-spin' : ''} />
-         </div>
-         <h2 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">
-            Ticker <span className="text-red-600">Control Room</span>
-         </h2>
+        <div className="p-3 bg-red-600 text-white rounded-2xl shadow-lg">
+          <Database size={24} className={isLoading ? 'animate-spin' : ''} />
+        </div>
+        <h2 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">
+          Ticker <span className="text-red-600">Control Room</span>
+        </h2>
       </div>
 
       {/* ADD FORM */}
@@ -86,8 +88,8 @@ const TickerManager = () => {
           value={newMsg}
           onChange={(e) => setNewMsg(e.target.value)}
         />
-        <button 
-          onClick={handlePost} 
+        <button
+          onClick={handlePost}
           disabled={isLoading}
           className="bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-black uppercase italic tracking-widest shadow-lg transition-all active:scale-95 flex items-center gap-2"
         >
@@ -102,10 +104,10 @@ const TickerManager = () => {
             <div key={t.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col gap-3 hover:border-red-100 transition-all">
               {editingId === t.id ? (
                 <div className="flex flex-col gap-4">
-                  <textarea 
-                    className="p-5 rounded-2xl border-2 border-red-50 font-bold text-slate-700 italic outline-none focus:border-red-500 bg-white" 
-                    value={tempMsg} 
-                    onChange={(e) => setTempMsg(e.target.value)} 
+                  <textarea
+                    className="p-5 rounded-2xl border-2 border-red-50 font-bold text-slate-700 italic outline-none focus:border-red-500 bg-white"
+                    value={tempMsg}
+                    onChange={(e) => setTempMsg(e.target.value)}
                   />
                   <div className="flex gap-3">
                     <button onClick={() => handleSave(t.id)} className="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs">Update Satellite Feed</button>
@@ -115,13 +117,13 @@ const TickerManager = () => {
               ) : (
                 <div className="flex justify-between items-center gap-6">
                   <div className="flex items-center gap-4">
-                    <div className={`w-3 h-3 rounded-full animate-pulse ${t.isActive ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-slate-300'}`} />
+                    <div className={`w-3 h-3 rounded-full animate-pulse ${t.active || t.isActive ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-slate-300'}`} />
                     <p className="font-bold text-slate-800 text-lg italic leading-tight uppercase tracking-tight">
                       "{t.message}"
                     </p>
                   </div>
-                  <button 
-                    onClick={() => { setEditingId(t.id); setTempMsg(t.message); }} 
+                  <button
+                    onClick={() => { setEditingId(t.id); setTempMsg(t.message); }}
                     className="p-3 bg-white hover:bg-red-50 rounded-xl text-red-600 shadow-sm border border-slate-100 transition-all hover:scale-110"
                   >
                     <Edit3 size={20} />
@@ -130,7 +132,7 @@ const TickerManager = () => {
               )}
             </div>
           ))}
-          
+
           {tickers.length === 0 && !isLoading && (
             <div className="text-center py-20 text-slate-300 font-black italic uppercase text-2xl">Signal Lost - No Data</div>
           )}

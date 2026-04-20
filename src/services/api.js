@@ -1,28 +1,41 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: 'https://apnews.onrender.com',
   headers: { 'Content-Type': 'application/json' },
 });
 
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('--- API ERROR LOG ---');
+    console.error('Status:', error.response?.status);
+    console.error('Data:', error.response?.data);
+    console.error('Message:', error.message);
+    return Promise.reject(error);
+  }
+);
+
+// --- CATEGORY ---
 // --- CATEGORY ---
 export const newsService = {
-  getCategoryNews: (category) => apiClient.get(`/${category}`),
-  getSingleNews: (category, id) => apiClient.get(`/${category}/${id}`),
-  postNews: (category, data) => apiClient.post(`/${category}`, data),
-  updateNews: (category, id, data) => apiClient.put(`/${category}/${id}`, data),
+  getCategoryNews: (category) => apiClient.get(`${category}`),
+  getSingleNews: (category, id) => apiClient.get(`${category}/${id}`),
+  postNews: (category, data) => apiClient.post(`${category}`, data),
+  updateNews: (category, id, data) => apiClient.put(`${category}/${id}`, data),
 };
 
 // --- TICKER ---
 export const tickerService = {
-  getAll: () => apiClient.get('/ticker/all'),
-  create: (payload) => apiClient.post('/ticker/create', payload),
-  update: (id, payload) => apiClient.put(`/ticker/update/${id}`, payload),
+  // Notice we removed the leading '/' because it's handled by baseURL
+  getAll: () => apiClient.get('api/ticker/all'),
+  create: (payload) => apiClient.post('api/ticker/create', payload),
+  update: (id, payload) => apiClient.put(`api/ticker/update/${id}`, payload),
 };
 
 // --- SYSTEM ---
 export const systemService = {
-  getLiveTv: () => apiClient.get('/livetv'),
-  getNavigation: () => apiClient.get('/categories'),
-  getPressPass: () => apiClient.get('/press-pass'),
+  getLiveTv: () => apiClient.get('livetv'),
+  getNavigation: () => apiClient.get('categories'),
+  getPressPass: () => apiClient.get('press-pass'),
 };
