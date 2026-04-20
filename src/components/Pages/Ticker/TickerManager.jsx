@@ -29,24 +29,25 @@ const TickerManager = () => {
 
   // --- 3. POST NEW HEADLINE ---
   const handlePost = async () => {
-    if (!newMsg.trim()) return;
-    setIsLoading(true);
-    try {
-      const payload = {
-        message: newMsg,
-        isActive: true,
-        priority: "High"
-      };
-      await tickerService.create(payload);
-      setNewMsg("");
-      await loadData();
-    } catch (err) {
-      console.error("Post Error:", err);
-      alert("Post Failed - Check Backend Logs");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  if (!newMsg.trim()) return;
+  setIsLoading(true);
+  try {
+    const payload = {
+      message: newMsg,
+      active: true,      // Changed from 'isActive' to match standard Java boolean field
+      priority: "High" 
+    };
+    await tickerService.create(payload);
+    setNewMsg("");
+    await loadData();
+  } catch (err) {
+    // THIS IS KEY: Check what the server actually said
+    console.error("Server Error Details:", err.response?.data);
+    alert(`Error: ${err.response?.data?.message || "Check Console"}`);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // --- 4. UPDATE EXISTING ---
   const handleSave = async (id) => {

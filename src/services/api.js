@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'https://apnews.onrender.com',
+  baseURL: 'https://apnews.onrender.com/api',
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -28,9 +28,9 @@ export const newsService = {
 // --- TICKER ---
 export const tickerService = {
   // Notice we removed the leading '/' because it's handled by baseURL
-  getAll: () => apiClient.get('api/all'),
-  create: (payload) => apiClient.post('api/create', payload),
-  update: (id, payload) => apiClient.put(`api/update/${id}`, payload),
+  getAll: () => apiClient.get('/all'),
+  create: (payload) => apiClient.post('/create', payload),
+  update: (id, payload) => apiClient.put(`/update/${id}`, payload),
 };
 
 // --- SYSTEM ---
