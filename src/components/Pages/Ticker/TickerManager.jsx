@@ -34,16 +34,16 @@ const TickerManager = () => {
   try {
     const payload = {
       message: newMsg,
-      active: true,      // Changed from 'isActive' to match standard Java boolean field
+      active: true,      // Standard Java field name
+      isActive: true,    // Backup for Jackson mapping
       priority: "High" 
     };
     await tickerService.create(payload);
     setNewMsg("");
     await loadData();
   } catch (err) {
-    // THIS IS KEY: Check what the server actually said
-    console.error("Server Error Details:", err.response?.data);
-    alert(`Error: ${err.response?.data?.message || "Check Console"}`);
+    console.error("POST ERROR:", err.response?.data || err.message);
+    alert("Post Failed. Check Render logs for 'UnrecognizedPropertyException'");
   } finally {
     setIsLoading(false);
   }
