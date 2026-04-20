@@ -1,19 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import {tickerService } from '../../../services/api';
+import { tickerService } from '../../../services/api';
 
 const Ticker = () => {
   const [scrollingText, setScrollingText] = useState("Loading Live Feed...");
 
   const fetchDisplayData = async () => {
     try {
+      // Changed from getTicker() to getAll() to match your api.js
       const res = await tickerService.getAll();
-      // Filter for items where isActive OR active is true
-      const activeMsgs = res.data
-        .filter(t => t.active === true || t.isActive === true)
-        .map(t => t.message);
 
-      setScrollingText(activeMsgs.length > 0 ? activeMsgs.join("    |    ") : "FLASHREPORT: Stay Tuned for Updates.");
-    } catch {
+      if (res.data && Array.isArray(res.data)) {
+        const activeMsgs = res.data
+          .filter(t => t.active === true || t.isActive === true)
+          .map(t => t.message);
+
+        setScrollingText(
+          activeMsgs.length > 0
+            ? activeMsgs.join("    |    ")
+            : "FLASHREPORT: Stay Tuned for Updates."
+        );
+      }
+    } catch (err) {
+      console.error("Ticker fetch failed:", err);
       setScrollingText("FLASHREPORT: System checking for updates...");
     }
   };
