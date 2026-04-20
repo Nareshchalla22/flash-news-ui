@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Edit3, Save, PlusCircle } from 'lucide-react';
-import { newsService, tickerService } from '../../../services/api';
+import { Edit3, Database, Send, CheckCircle } from 'lucide-react';
+import { tickerService } from '../../../services/api'; // Use tickerService exclusively
 
 const TickerManager = () => {
   const [tickers, setTickers] = useState([]);
@@ -14,7 +14,6 @@ const TickerManager = () => {
     setIsLoading(true);
     try {
       const res = await tickerService.getTicker();
-      // Ensure we always have an array even if the backend is empty
       setTickers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Fetch Error:", err);
@@ -23,114 +22,118 @@ const TickerManager = () => {
     }
   };
 
-  // 2. SYNTAX-FIXED EFFECT (No more cascading render error)
   useEffect(() => {
-    const initFetch = async () => {
-      await loadData();
-    };
-    initFetch();
+    loadData();
   }, []);
 
-  // 3. POST NEW HEADLINE
+  // 2. POST NEW HEADLINE
   const handlePost = async () => {
     if (!newMsg.trim()) return;
+    setIsLoading(true);
     try {
-      // Discrepancy Fix: Sending both variations of the boolean
       const payload = { 
         message: newMsg, 
-        active: true, 
         isActive: true, 
         priority: "High" 
       };
-      await newsService.createTicker(payload);
+      await tickerService.createTicker(payload); // Fixed service reference
       setNewMsg("");
       await loadData();
-      alert("Flash Headline Posted Live!");
     } catch (err) {
       console.error("Post Error:", err);
-      alert("Post Failed - Check Java Console and CORS settings",err);
+      alert("Post Failed - Check if Backend URL includes /api");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // 4. UPDATE EXISTING
+  // 3. UPDATE EXISTING
   const handleSave = async (id) => {
     if (!tempMsg.trim()) return;
+    setIsLoading(true);
     try {
-      await newsService.updateTicker(id, { 
+      await tickerService.updateTicker(id, { 
         message: tempMsg, 
-        active: true, 
         isActive: true, 
         priority: "High" 
       });
       setEditingId(null);
       await loadData();
-    } catch {
-      alert("Update Failed");
+    } catch (err) {
+      alert("Update Failed",err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
+    <div className="max-w-4xl mx-auto p-6 space-y-8 mt-10">
+      {/* HEADER SECTION */}
+      <div className="flex items-center gap-4 mb-2">
+         <div className="p-3 bg-red-600 text-white rounded-2xl shadow-lg">
+            <Database size={24} className={isLoading ? 'animate-spin' : ''} />
+         </div>
+         <h2 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">
+            Ticker <span className="text-red-600">Control Room</span>
+         </h2>
+      </div>
+
       {/* ADD FORM */}
-      <div className="bg-slate-900 p-6 rounded-3xl shadow-xl flex flex-col md:flex-row gap-4">
+      <div className="bg-slate-900 p-6 rounded-[2rem] shadow-xl flex flex-col md:flex-row gap-4 border-4 border-slate-800">
         <input
-          className="flex-1 bg-white/10 rounded-xl px-4 py-3 text-white font-bold italic outline-none border border-white/5 focus:border-blue-500 transition-all"
-          placeholder="Type new breaking news here..."
+          className="flex-1 bg-white/10 rounded-2xl px-6 py-4 text-white font-bold italic outline-none border border-white/5 focus:border-red-500 transition-all"
+          placeholder="ENTER BREAKING NEWS HEADLINE..."
           value={newMsg}
           onChange={(e) => setNewMsg(e.target.value)}
         />
         <button 
           onClick={handlePost} 
-          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg transition-all active:scale-95"
+          disabled={isLoading}
+          className="bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-2xl font-black uppercase italic tracking-widest shadow-lg transition-all active:scale-95 flex items-center gap-2"
         >
-          Post Live
+          <Send size={18} /> {isLoading ? "Syncing..." : "Post Live"}
         </button>
       </div>
 
       {/* LIST SECTION */}
-      <div className="bg-white p-8 rounded-[2rem] shadow-2xl border border-slate-100 min-h-[300px]">
-        <div className="flex justify-between items-center mb-8 border-b-2 border-red-600 pb-2">
-          <h2 className="text-2xl font-black italic uppercase text-slate-900 tracking-tighter">
-            Ticker Control Room
-          </h2>
-          {isLoading && <div className="text-[10px] font-bold text-blue-500 animate-pulse uppercase">Syncing...</div>}
-        </div>
-
+      <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl border border-slate-100">
         <div className="space-y-4">
-          {tickers.length === 0 && !isLoading && (
-            <div className="text-center py-10 text-slate-300 font-bold italic uppercase">No Tickers Found</div>
-          )}
-          
           {tickers.map(t => (
-            <div key={t.id} className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col gap-3 transition-all hover:shadow-md">
+            <div key={t.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col gap-3 hover:border-red-100 transition-all">
               {editingId === t.id ? (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-4">
                   <textarea 
-                    className="p-4 rounded-xl border-2 border-blue-100 font-bold text-slate-700 italic outline-none focus:border-blue-500" 
+                    className="p-5 rounded-2xl border-2 border-red-50 font-bold text-slate-700 italic outline-none focus:border-red-500 bg-white" 
                     value={tempMsg} 
                     onChange={(e) => setTempMsg(e.target.value)} 
                   />
-                  <div className="flex gap-2">
-                    <button onClick={() => handleSave(t.id)} className="flex-1 bg-slate-900 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">Update Feed</button>
-                    <button onClick={() => setEditingId(null)} className="px-6 text-slate-400 font-bold text-[10px] uppercase">Cancel</button>
+                  <div className="flex gap-3">
+                    <button onClick={() => handleSave(t.id)} className="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs">Update Satellite Feed</button>
+                    <button onClick={() => setEditingId(null)} className="px-8 text-slate-400 font-bold uppercase text-xs">Cancel</button>
                   </div>
                 </div>
               ) : (
-                <div className="flex justify-between items-center gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${(t.active || t.isActive) ? 'bg-green-500' : 'bg-slate-300'}`} />
-                    <p className="font-bold text-slate-700 italic leading-snug">"{t.message}"</p>
+                <div className="flex justify-between items-center gap-6">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-3 h-3 rounded-full animate-pulse ${t.isActive ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-slate-300'}`} />
+                    <p className="font-bold text-slate-800 text-lg italic leading-tight uppercase tracking-tight">
+                      "{t.message}"
+                    </p>
                   </div>
                   <button 
                     onClick={() => { setEditingId(t.id); setTempMsg(t.message); }} 
-                    className="p-2 bg-white hover:bg-blue-50 rounded-lg text-blue-600 shadow-sm border border-slate-100 transition-colors"
+                    className="p-3 bg-white hover:bg-red-50 rounded-xl text-red-600 shadow-sm border border-slate-100 transition-all hover:scale-110"
                   >
-                    <Edit3 size={18} />
+                    <Edit3 size={20} />
                   </button>
                 </div>
               )}
             </div>
           ))}
+          
+          {tickers.length === 0 && !isLoading && (
+            <div className="text-center py-20 text-slate-300 font-black italic uppercase text-2xl">Signal Lost - No Data</div>
+          )}
         </div>
       </div>
     </div>
