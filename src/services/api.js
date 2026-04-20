@@ -40,12 +40,12 @@ export const systemService = {
   getNavigation: () => apiClient.get('/categories'),
   getPressPass: () => apiClient.get('/press-pass'),
 };
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (!error.response) {
-      alert("AP13 Satellite Uplink is starting up. Please refresh in 30 seconds.");
-    }
-    return Promise.reject(error);
-  }
-);
+// apiClient.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (!error.response) {
+//       alert("AP13 Satellite Uplink is starting up. Please refresh in 30 seconds.");
+//     }
+//     return Promise.reject(error);
+//   }
+// );
