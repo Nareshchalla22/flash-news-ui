@@ -43,7 +43,7 @@ const AppRoutes = () => {
 
       {/* ✅ Admin & Management */}
       <Route path="/update-data" element={<UpdateNews />} />
-      <Route path="/ticker" element={<TickerManager />} />
+      <Route path="/ticker-control" element={<TickerManager />} />
 
       {/* ✅ Dynamic & Static Pages */}
       <Route path="/category/:name" element={<CategoryPage />} />
