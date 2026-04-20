@@ -36,7 +36,7 @@ const AppRoutes = () => {
       <Route path="/entertainment" element={<EntertainmentPage />} />
       <Route path="/sports" element={<SportsPage />} />
       <Route path="/health" element={<HealthPage />} />
-      <Route path="/politics" element={<PoliticsPage />} />
+      <Route path="/category/:name" element={<PoliticsPage />} />
       <Route path="/travel" element={<TravelPage />} />
       <Route path="/trending" element={<TrendingPage />} />
       <Route path="/livetv" element={<LiveTVPage />} />
