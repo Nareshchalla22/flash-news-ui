@@ -189,7 +189,7 @@ function ProofModal({ app, onClose, onApprove, onReject }) {
 }
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
-export default function AdminApplicationsPage() {
+export function AdminApplicationsPage() {
   const [apps,    setApps]    = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter,  setFilter]  = useState('ALL');
@@ -481,3 +481,4 @@ export default function AdminApplicationsPage() {
     </div>
   );
 }
+export default AdminApplicationsPage;
