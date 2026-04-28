@@ -5,7 +5,7 @@ import { navItems } from '../../Navbar/navdata';
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 const ACTIVE_CATS = ['Global', 'National', 'Business', 'Sports', 'Entertainment', 'Health', 'Politics', 'Crime', 'State'];
-const CAT_COLORS  = {
+const CAT_COLORS = {
   Global: '#3b82f6', National: '#10b981', Business: '#8b5cf6',
   Sports: '#f97316', Entertainment: '#ec4899', Health: '#14b8a6',
   Politics: '#6366f1', Crime: '#ef4444', State: '#f59e0b',
@@ -43,13 +43,13 @@ function Skeleton({ w = '100%', h = 200, r = 8 }) {
 function NewsCard({ item, category, size = 'sm', style: extraStyle }) {
   const [imgErr, setImgErr] = useState(false);
   const color = CAT_COLORS[category] || '#ef4444';
-  const path  = `/category/${category?.toLowerCase()}`;
+  const path = `/category/${category?.toLowerCase()}`;
 
   const title = item?.title || item?.matchTitle || item?.movieTitle ||
-                item?.companyName || item?.gadgetHead || 'AP13 News Update';
-  const desc  = item?.description || item?.summary || item?.analysis ||
-                item?.gossipContent || item?.medicalAdvice || '';
-  const img   = item?.imageUrl;
+    item?.companyName || item?.gadgetHead || 'AP13 News Update';
+  const desc = item?.description || item?.summary || item?.analysis ||
+    item?.gossipContent || item?.medicalAdvice || '';
+  const img = item?.imageUrl;
 
   if (size === 'hero') {
     return (
@@ -60,8 +60,10 @@ function NewsCard({ item, category, size = 'sm', style: extraStyle }) {
         }}>
           {img && !imgErr ? (
             <img src={img} alt={title} onError={() => setImgErr(true)}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block',
-                transition: 'transform 0.8s ease', }} />
+              style={{
+                width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+                transition: 'transform 0.8s ease',
+              }} />
           ) : (
             <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #0f172a, #1e293b)' }} />
           )}
@@ -162,8 +164,8 @@ function NewsCard({ item, category, size = 'sm', style: extraStyle }) {
 
 // ─── CATEGORY SECTION ─────────────────────────────────────────────────────────
 function CategorySection({ category, news }) {
-  const color   = CAT_COLORS[category] || '#ef4444';
-  const path    = `/category/${category.toLowerCase()}`;
+  const color = CAT_COLORS[category] || '#ef4444';
+  const path = `/category/${category.toLowerCase()}`;
   const [main, ...rest] = news;
 
   return (
@@ -231,8 +233,10 @@ function SocialPill({ icon, label, count, url, color }) {
         }}>{icon}</div>
         <span style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>{label}</span>
       </div>
-      <span style={{ fontSize: 14, fontWeight: 900, color: '#f1f5f9',
-        fontFamily: "'Oswald', sans-serif", fontStyle: 'italic' }}>{count}</span>
+      <span style={{
+        fontSize: 14, fontWeight: 900, color: '#f1f5f9',
+        fontFamily: "'Oswald', sans-serif", fontStyle: 'italic'
+      }}>{count}</span>
     </a>
   );
 }
@@ -254,9 +258,11 @@ function TrendingSidebar({ allNews }) {
         display: 'flex', alignItems: 'center', gap: 8,
       }}>
         <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', animation: 'blink 1.2s infinite' }} />
-        <span style={{ fontSize: 11, fontWeight: 800, color: '#ef4444',
+        <span style={{
+          fontSize: 11, fontWeight: 800, color: '#ef4444',
           textTransform: 'uppercase', letterSpacing: '0.15em',
-          fontFamily: "'Oswald', sans-serif" }}>Trending Now</span>
+          fontFamily: "'Oswald', sans-serif"
+        }}>Trending Now</span>
       </div>
       <div style={{ padding: '4px 16px 8px' }}>
         {trending.map((item, i) => {
@@ -329,8 +335,8 @@ function WeatherWidget() {
 // ─── MAIN HOME PAGE ───────────────────────────────────────────────────────────
 export default function Home() {
   const [categoryNews, setCategoryNews] = useState({});
-  const [loading,      setLoading]      = useState(true);
-  const [activeTab,    setActiveTab]    = useState('All');
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('All');
   const tickerRef = useRef(null);
 
   const activeSections = navItems.filter(i => ACTIVE_CATS.includes(i.label));
@@ -441,7 +447,7 @@ export default function Home() {
           }}>
             {tabs.map(tab => {
               const active = activeTab === tab;
-              const color  = CAT_COLORS[tab] || '#ef4444';
+              const color = CAT_COLORS[tab] || '#ef4444';
               return (
                 <button key={tab} onClick={() => setActiveTab(tab)} style={{
                   padding: '6px 14px', borderRadius: 6, flexShrink: 0,
@@ -463,7 +469,7 @@ export default function Home() {
             {/* Content */}
             <div>
               {loading ? (
-                [1,2,3].map(i => <Skeleton key={i} h={300} style={{ marginBottom: 40 }} />)
+                [1, 2, 3].map(i => <Skeleton key={i} h={300} style={{ marginBottom: 40 }} />)
               ) : (
                 displaySections.map(cat => {
                   const news = categoryNews[cat.label] || [];
@@ -492,13 +498,15 @@ export default function Home() {
                 borderRadius: 14, overflow: 'hidden',
               }}>
                 <div style={{ padding: '12px 16px', borderBottom: '1px solid #1e293b' }}>
-                  <span style={{ fontSize: 10, fontWeight: 800, color: '#475569',
+                  <span style={{
+                    fontSize: 10, fontWeight: 800, color: '#475569',
                     textTransform: 'uppercase', letterSpacing: '0.15em',
-                    fontFamily: "'Oswald', sans-serif" }}>Follow AP13</span>
+                    fontFamily: "'Oswald', sans-serif"
+                  }}>Follow AP13</span>
                 </div>
                 <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <SocialPill icon="▶" label="YouTube"   count="8.5K"  url="https://youtube.com/@ap13news"      color="#ef4444" />
-                  <SocialPill icon="f" label="Facebook"  count="1.2M"  url="https://facebook.com/apnewslocal"   color="#1877f2" />
+                  <SocialPill icon="▶" label="YouTube" count="8.5K" url="https://youtube.com/@ap13news" color="#ef4444" />
+                  <SocialPill icon="f" label="Facebook" count="1.2M" url="https://facebook.com/apnewslocal" color="#1877f2" />
                   <SocialPill icon="📸" label="Instagram" count="420K" url="https://instagram.com/ap13news_telugu" color="#e1306c" />
                 </div>
               </div>
@@ -515,12 +523,16 @@ export default function Home() {
                     width: 80, height: 80, borderRadius: '50%',
                     background: 'rgba(255,255,255,0.08)',
                   }} />
-                  <p style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.7)',
+                  <p style={{
+                    fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.7)',
                     textTransform: 'uppercase', letterSpacing: '0.2em',
-                    fontFamily: "'Oswald', sans-serif", margin: '0 0 6px' }}>Now Recruiting</p>
-                  <p style={{ fontSize: 18, fontWeight: 900, fontStyle: 'italic',
+                    fontFamily: "'Oswald', sans-serif", margin: '0 0 6px'
+                  }}>Now Recruiting</p>
+                  <p style={{
+                    fontSize: 18, fontWeight: 900, fontStyle: 'italic',
                     color: '#fff', fontFamily: "'Oswald', sans-serif",
-                    margin: '0 0 8px', lineHeight: 1.2 }}>
+                    margin: '0 0 8px', lineHeight: 1.2
+                  }}>
                     Become an AP13 Reporter
                   </p>
                   <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', margin: '0 0 12px', lineHeight: 1.5 }}>
@@ -544,9 +556,11 @@ export default function Home() {
               }}>
                 <div style={{ padding: '12px 16px', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', animation: 'blink 1.2s infinite' }} />
-                  <span style={{ fontSize: 10, fontWeight: 800, color: '#ef4444',
+                  <span style={{
+                    fontSize: 10, fontWeight: 800, color: '#ef4444',
                     textTransform: 'uppercase', letterSpacing: '0.15em',
-                    fontFamily: "'Oswald', sans-serif" }}>Live on YouTube</span>
+                    fontFamily: "'Oswald', sans-serif"
+                  }}>Live on YouTube</span>
                 </div>
                 <div style={{ padding: 12 }}>
                   <a href="https://www.youtube.com/@ap13news" target="_blank" rel="noreferrer" style={{
@@ -559,8 +573,10 @@ export default function Home() {
                       background: '#ef4444', display: 'flex',
                       alignItems: 'center', justifyContent: 'center', fontSize: 20,
                     }}>▶</div>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b',
-                      fontFamily: "'Oswald', sans-serif", letterSpacing: '0.05em' }}>Watch AP13 Live</span>
+                    <span style={{
+                      fontSize: 11, fontWeight: 700, color: '#64748b',
+                      fontFamily: "'Oswald', sans-serif", letterSpacing: '0.05em'
+                    }}>Watch AP13 Live</span>
                   </a>
                 </div>
               </div>

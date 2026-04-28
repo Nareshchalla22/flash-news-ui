@@ -9,7 +9,7 @@ const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// ─── REQUEST INTERCEPTOR: attach JWT token automatically ─────────────────────
+// ─── REQUEST INTERCEPTOR ──────────────────────────────────────────────────────
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('ap13_token');
@@ -21,14 +21,13 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ─── RESPONSE INTERCEPTOR: handle 401 / 403 globally ────────────────────────
+// ─── RESPONSE INTERCEPTOR ─────────────────────────────────────────────────────
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
 
     if (status === 401) {
-      // Token expired or invalid — clear session and redirect to login
       localStorage.removeItem('ap13_token');
       localStorage.removeItem('ap13_user');
       if (window.location.pathname !== '/login') {
@@ -37,14 +36,9 @@ apiClient.interceptors.response.use(
     }
 
     if (status === 403) {
-      // Authenticated but not authorized
       window.location.href = '/unauthorized';
     }
 
-    console.error('--- API ERROR LOG ---');
-    console.error('Status:', status);
-    console.error('Data:', error.response?.data);
-    console.error('Message:', error.message);
     return Promise.reject(error);
   }
 );
@@ -58,26 +52,49 @@ export const authService = {
 
 // ─── CATEGORY NEWS ────────────────────────────────────────────────────────────
 export const newsService = {
-  getCategoryNews: (category)         => apiClient.get(`/${category}`),
-  getSingleNews:   (category, id)     => apiClient.get(`/${category}/${id}`),
-  postNews:        (category, data)   => apiClient.post(`/${category}`, data),
-  updateNews:      (category, id, data) => apiClient.put(`/${category}/${id}`, data),
-  deleteNews:      (category, id)     => apiClient.delete(`/${category}/${id}`),
+  getCategoryNews:  (category)              => apiClient.get(`/${category}`),
+  getSingleNews:    (category, id)          => apiClient.get(`/${category}/${id}`),
+  postNews:         (category, data)        => apiClient.post(`/${category}`, data),
+  updateNews:       (category, id, data)    => apiClient.put(`/${category}/${id}`, data),
+  deleteNews:       (category, id)          => apiClient.delete(`/${category}/${id}`),
 };
 
 // ─── TICKER ───────────────────────────────────────────────────────────────────
 export const tickerService = {
-  getAll:  ()              => apiClient.get('/all'),
-  create:  (payload)       => apiClient.post('/create', payload),
-  update:  (id, payload)   => apiClient.put(`/update/${id}`, payload),
-  delete:  (id)            => apiClient.delete(`/delete/${id}`),
+  getAll:    ()              => apiClient.get('/all'),
+  getActive: ()              => apiClient.get('/all/active'),
+  create:    (payload)       => apiClient.post('/create', payload),
+  update:    (id, payload)   => apiClient.put(`/update/${id}`, payload),
+  toggle:    (id)            => apiClient.patch(`/ticker/${id}/toggle`),
+  delete:    (id)            => apiClient.delete(`/ticker/${id}`),
+};
+
+// ─── MEDIA UPLOAD ─────────────────────────────────────────────────────────────
+export const mediaService = {
+  upload:       (formData)   => apiClient.post('/media/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  uploadBase64: (data)       => apiClient.post('/media/upload-base64', data),
+  delete:       (url)        => apiClient.delete('/media/delete', { data: { url } }),
+  health:       ()           => apiClient.get('/media/health'),
+};
+
+// ─── REPORTER APPLICATION ─────────────────────────────────────────────────────
+export const reporterService = {
+  submit:     (data)         => apiClient.post('/reporter-application', data),
+  getAll:     ()             => apiClient.get('/reporter-application'),
+  getById:    (id)           => apiClient.get(`/reporter-application/${id}`),
+  getByStatus:(status)       => apiClient.get(`/reporter-application/status/${status}`),
+  approve:    (id, note)     => apiClient.put(`/reporter-application/${id}/approve`, { note }),
+  reject:     (id, note)     => apiClient.put(`/reporter-application/${id}/reject`, { note }),
+  delete:     (id)           => apiClient.delete(`/reporter-application/${id}`),
 };
 
 // ─── SYSTEM ───────────────────────────────────────────────────────────────────
 export const systemService = {
-  getLiveTv:    () => apiClient.get('/livetv'),
-  getNavigation:() => apiClient.get('/categories'),
-  getPressPass: () => apiClient.get('/press-pass'),
+  getLiveTv:     ()          => apiClient.get('/livetv'),
+  getNavigation: ()          => apiClient.get('/categories'),
+  getPressPass:  ()          => apiClient.get('/press-pass'),
 };
 
 export default apiClient;

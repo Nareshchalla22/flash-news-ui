@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { tickerService } from '../../../services/api';
 
 const Ticker = () => {
-  const [scrollingText, setScrollingText] = useState("Loading Live Feed...");
+  const [scrollingText, setScrollingText] = useState("FLASHREPORT: Stay Tuned...");
+  const [loading, setLoading] = useState(true);
 
   const fetchDisplayData = async () => {
     try {
@@ -10,7 +11,7 @@ const Ticker = () => {
 
       if (res.data && Array.isArray(res.data)) {
         const activeMsgs = res.data
-          .filter(t => t.active === true || t.isActive === true)
+          .filter(t => t.active === true)
           .map(t => t.message);
 
         setScrollingText(
@@ -20,8 +21,10 @@ const Ticker = () => {
         );
       }
     } catch (err) {
+      // Don't update text on error — keep existing text
       console.error("Ticker fetch failed:", err);
-      setScrollingText("FLASHREPORT: System checking for updates...");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -36,7 +39,6 @@ const Ticker = () => {
 
       {/* Label */}
       <div className="relative bg-white/40 backdrop-blur-md px-6 h-full flex items-center font-bold text-red-600 text-xs md:text-sm whitespace-nowrap border-r border-white/30">
-        {/* Glow Pulse */}
         <span className="absolute inset-0 rounded-2xl animate-pulse shadow-[0_0_25px_rgba(239,68,68,0.6)] opacity-70"></span>
         <span className="relative flex items-center gap-2">
           <span className="w-2 h-2 bg-red-600 rounded-full animate-ping"></span>
