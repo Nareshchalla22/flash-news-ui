@@ -4,7 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
-import ErrorBoundary from './ErrorBoundary'
+import ErrorBoundary from './Errorboundary.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
