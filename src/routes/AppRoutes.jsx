@@ -22,6 +22,8 @@ import LiveTVPage from '../components/Pages/category/LiveTVPage';
 import UpdateNews from '../components/Pages/Form/UpdateNews';
 import TickerManager from '../components/Pages/Ticker/TickerManager';
 import AdminDashboard from '../components/Admin/AdminDashboard';
+import AdminApplicationsPage from '../components/Admin/AdminApplicationsPage';
+
 // ✅ AUTH
 import LoginPage from '../auth/LoginPage';
 import UnauthorizedPage from '../auth/UnauthorizedPage';
@@ -57,13 +59,13 @@ const AppRoutes = () => {
       } />
 
       {/* ── Protected: any logged-in user ── */}
-      {/* <Route path="/id-card" element={
+       <Route path="/id-card" element={
         <ProtectedRoute>
           <div className="p-20 text-center font-black italic text-2xl uppercase text-slate-800">
             <PressIdPagee />
           </div>
         </ProtectedRoute>
-      } />
+      } /> 
 
       {/* ── Admin only routes ── */}
       <Route path="/admin" element={
@@ -84,11 +86,11 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
 
-      {/* <Route path="/admin/applications" element={
+      <Route path="/admin/applications" element={
         <ProtectedRoute requireAdmin>
-          <AdminApplicationsPage/>
+          <AdminApplicationsPage />
         </ProtectedRoute>
-      } /> */}
+      } />
       {/* ── 404 ── */}
       <Route path="*" element={
         <div className="p-20 text-center font-black italic text-slate-300 text-4xl uppercase">
