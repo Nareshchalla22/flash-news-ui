@@ -84,11 +84,11 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
 
-      <Route path="/admin/applications" element={
+      {/* <Route path="/admin/applications" element={
         <ProtectedRoute requireAdmin>
           <AdminApplicationsPage/>
         </ProtectedRoute>
-      } />
+      } /> */}
       {/* ── 404 ── */}
       <Route path="*" element={
         <div className="p-20 text-center font-black italic text-slate-300 text-4xl uppercase">
