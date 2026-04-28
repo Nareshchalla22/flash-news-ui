@@ -22,6 +22,7 @@ import LiveTVPage from '../components/Pages/category/LiveTVPage';
 import UpdateNews from '../components/Pages/Form/UpdateNews';
 import TickerManager from '../components/Pages/Ticker/TickerManager';
 import AdminDashboard from '../components/Admin/AdminDashboard';
+import AdminApplicationsPage from '../components/Admin/Adminapplicationspage';
 
 // ✅ AUTH
 import LoginPage from '../auth/LoginPage';
