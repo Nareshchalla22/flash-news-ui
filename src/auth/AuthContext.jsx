@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useCallback, useEffect } from "rea
 // ─── API BASE URL ─────────────────────────────────────────────────────────────
 const BASE_URL = window.location.hostname === "localhost"
   ? "http://localhost:8080/api"
-  : "http://18.61.229.102/api";
+  : "https://18.61.229.102.nip.io/api";
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 const AuthContext = createContext(null);
