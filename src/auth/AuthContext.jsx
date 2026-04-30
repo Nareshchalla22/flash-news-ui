@@ -1,12 +1,14 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 
-const AuthContext = createContext(null);
-
+// ─── API BASE URL ─────────────────────────────────────────────────────────────
 const BASE_URL = window.location.hostname === "localhost"
   ? "http://localhost:8080/api"
   : "http://18.61.229.102/api";
 
-// ─── Safe localStorage wrapper (handles Safari private mode) ─────────────────
+// ─── Context ──────────────────────────────────────────────────────────────────
+const AuthContext = createContext(null);
+
+// ─── Safe localStorage wrapper ────────────────────────────────────────────────
 function safeStorage() {
   try {
     localStorage.setItem("__ap13_test__", "1");
@@ -24,11 +26,12 @@ function safeStorage() {
 }
 const storage = safeStorage();
 
-// ─── Safe JSON parse (never throws) ──────────────────────────────────────────
+// ─── Safe JSON parse ──────────────────────────────────────────────────────────
 function safeJson(str) {
   try { return JSON.parse(str); } catch { return null; }
 }
 
+// ─── AuthProvider ─────────────────────────────────────────────────────────────
 export function AuthProvider({ children }) {
   const [user,    setUser]    = useState(null);
   const [token,   setToken]   = useState(null);
@@ -43,8 +46,7 @@ export function AuthProvider({ children }) {
         setToken(t);
         setUser(u);
       }
-    } catch (e) {
-      console.warn("Session restore failed:", e);
+    } catch {
       storage.clear();
     } finally {
       setLoading(false);
@@ -52,7 +54,6 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(async (username, password) => {
-    // ── Abort controller: 20s timeout handles Render cold start ──────────────
     const controller = new AbortController();
     const timeoutId  = setTimeout(() => controller.abort(), 20000);
 
@@ -65,7 +66,6 @@ export function AuthProvider({ children }) {
       });
       clearTimeout(timeoutId);
 
-      // ── Parse error body safely ───────────────────────────────────────────
       let data;
       const contentType = res.headers.get("content-type") || "";
       if (contentType.includes("application/json")) {
@@ -80,20 +80,14 @@ export function AuthProvider({ children }) {
           data?.message ||
           (res.status === 401 ? "Wrong username or password." :
            res.status === 403 ? "Access denied." :
-           res.status === 500 ? "Server error — try again in a moment." :
+           res.status === 500 ? "Server error — try again." :
            `Login failed (${res.status}).`)
         );
       }
 
-      // ── Validate response shape ───────────────────────────────────────────
-      if (!data?.token) {
-        throw new Error("Invalid server response — missing token.");
-      }
-      if (!data?.user) {
-        throw new Error("Invalid server response — missing user info.");
-      }
+      if (!data?.token) throw new Error("Invalid response — missing token.");
+      if (!data?.user)  throw new Error("Invalid response — missing user.");
 
-      // ── Persist session ───────────────────────────────────────────────────
       storage.setItem("ap13_token", data.token);
       storage.setItem("ap13_user",  JSON.stringify(data.user));
       setToken(data.token);
@@ -102,18 +96,11 @@ export function AuthProvider({ children }) {
 
     } catch (err) {
       clearTimeout(timeoutId);
-
-      // Cold start / network timeout
       if (err.name === "AbortError") {
-        throw new Error(
-          "Server is waking up (Render cold start). Please wait 30 seconds and try again."
-        );
+        throw new Error("Server timeout. Please try again.");
       }
-      // Network down
       if (err.message === "Failed to fetch" || err.message.includes("NetworkError")) {
-        throw new Error(
-          "Cannot reach the server. Check your internet connection or try again later."
-        );
+        throw new Error("Cannot reach the server. Check your connection.");
       }
       throw err;
     }
@@ -140,6 +127,8 @@ export function AuthProvider({ children }) {
   );
 }
 
+// ─── useAuth hook — separate export fixes ESLint warning ─────────────────────
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be inside AuthProvider");
