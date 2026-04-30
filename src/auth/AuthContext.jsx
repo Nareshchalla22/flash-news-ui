@@ -4,7 +4,7 @@ const AuthContext = createContext(null);
 
 const BASE_URL = window.location.hostname === "localhost"
   ? "http://localhost:8080/api"
-  : "https://18.61.229.102/api";
+  : "http://18.61.229.102/api";
 
 // ─── Safe localStorage wrapper (handles Safari private mode) ─────────────────
 function safeStorage() {

@@ -5,7 +5,7 @@ const isLocal = window.location.hostname === 'localhost';
 const apiClient = axios.create({
   baseURL: isLocal
     ? 'http://localhost:8080/api'
-    : 'https://18.61.229.102/api',
+    : 'http://18.61.229.102/api',
   headers: { 'Content-Type': 'application/json' },
   timeout: 30000,
 });
