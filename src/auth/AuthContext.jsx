@@ -5,7 +5,7 @@ const AuthContext = createContext(null);
 const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
 const BASE_URL = isLocal
   ? "http://localhost:8080/api"
-  : "https://apnews.onrender.com/api";
+  : "http://18.61.229.102/api";
 
 // ─── Safe localStorage wrapper (handles Safari private mode) ─────────────────
 function safeStorage() {
