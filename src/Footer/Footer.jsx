@@ -3,66 +3,63 @@ import { socialLinks, footerInfo, navItems } from '../Navbar/navdata';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
+  const year = new Date().getFullYear();
+  const categories = navItems
+    .filter(i => !['Home', 'System Update', 'Login', 'Live TV', 'Trending', 'ID Card', 'Admin'].includes(i.label))
+    .slice(0, 8);
+
   return (
-    <footer className="bg-[#d1d131] text-slate-400 py-16 px-6 border-t-4 border-red-600">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* 1. TOP SECTION: Network Subscription */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
-          <div className="max-w-md text-center md:text-left">
-            <h2 className="text-white text-3xl font-[1000] italic uppercase tracking-tighter leading-none mb-2">
-              Stay Informed, <span className="text-red-600">Not Overwhelmed</span>
-            </h2>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Join the AP13 News Daily Briefing</p>
-          </div>
-          
-          <div className="flex w-full md:w-auto bg-slate-900 rounded-xl overflow-hidden shadow-2xl border border-slate-800 p-1">
-            <input 
-              type="email" 
-              placeholder="Email Address *" 
-              className="px-6 py-4 w-full md:w-72 bg-transparent text-white outline-none text-sm font-bold"
-            />
-            <button className="bg-red-600 hover:bg-white hover:text-red-600 text-white px-8 py-4 font-black uppercase text-[10px] tracking-widest transition-all duration-300 rounded-lg shadow-lg">
-              Subscribe
-            </button>
-          </div>
-        </div>
+    <footer className="bg-[#0a0a0a] text-slate-500 border-t-2 border-[#1DB954]">
 
-        <div className="h-px bg-linear-to-r from-transparent via-slate-800 to-transparent mb-12" />
+      {/* ── MAIN GRID ── */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
 
-        {/* 2. GRID SECTION */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-          
-          {/* Station Identity & Socials */}
-          <div className="flex flex-col items-center md:items-start text-center md:text-left">
-            <h3 className="text-white font-black mb-6 uppercase tracking-[0.2em] text-xs border-b-2 border-red-600 pb-2">Network Hub</h3>
-            <p className="text-sm mb-2 font-medium"><span className="text-slate-200">Broadcast:</span> 24/7 Digital Feed</p>
-            <p className="text-sm mb-8 font-medium"><span className="text-slate-200">Headquarters:</span> Hyderabad, TS</p>
-            
-            <div className="flex gap-4">
+          {/* Brand */}
+          <div>
+            <div className="flex items-baseline gap-1 mb-2">
+              <span className="text-2xl font-[900] italic uppercase tracking-tighter text-[#1DB954] transform -skew-x-12">
+                AP13
+              </span>
+              <span className="text-lg font-[800] italic uppercase text-white -skew-x-12 ml-1">
+                NEWS
+              </span>
+            </div>
+            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-[0.3em] mb-3">
+              FlashReport Network
+            </p>
+            <p className="text-xs text-slate-600 leading-relaxed mb-4">
+              24/7 digital journalism from Hyderabad, Telangana.
+            </p>
+            {/* Socials */}
+            <div className="flex gap-2">
               {socialLinks.map((social) => (
-                <a 
-                  key={social.label} 
-                  href={social.href} 
+                <a
+                  key={social.label}
+                  href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-11 h-11 flex items-center justify-center border border-slate-800 rounded-xl hover:bg-red-600 hover:border-red-600 hover:text-white transition-all duration-500 hover:-translate-y-1 shadow-xl group"
                   title={social.label}
+                  className="w-7 h-7 flex items-center justify-center border border-slate-800 rounded-lg hover:bg-[#1DB954] hover:border-[#1DB954] hover:text-black text-slate-600 transition-all duration-300 text-xs"
                 >
-                  <social.icon size={20} className="group-hover:scale-110 transition-transform" />
+                  <social.icon size={12} />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Direct Category Access */}
+          {/* Categories */}
           <div>
-            <h3 className="text-white font-black mb-6 uppercase tracking-[0.2em] text-xs border-b-2 border-slate-800 pb-2">Categories</h3>
-            <ul className="grid grid-cols-2 gap-y-3">
-              {navItems.filter(i => !['Home', 'System Update'].includes(i.label)).slice(0, 10).map(item => (
-                <li key={item.label} className="group">
-                  <Link to={item.path} className="text-slate-500 hover:text-red-600 transition-colors text-xs font-bold uppercase tracking-tighter flex items-center gap-2">
-                    <span className="w-1 h-1 bg-slate-800 group-hover:bg-red-600 rounded-full transition-colors"></span>
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">
+              Categories
+            </h4>
+            <ul className="space-y-1.5">
+              {categories.map(item => (
+                <li key={item.label}>
+                  <Link
+                    to={item.path}
+                    className="text-xs text-slate-600 hover:text-[#1DB954] transition-colors font-medium"
+                  >
                     {item.label}
                   </Link>
                 </li>
@@ -70,44 +67,63 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Information & Legal */}
+          {/* Info */}
           <div>
-            <h3 className="text-white font-black mb-6 uppercase tracking-[0.2em] text-xs border-b-2 border-slate-800 pb-2">Information</h3>
-            <ul className="space-y-4">
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">
+              Company
+            </h4>
+            <ul className="space-y-1.5">
               {footerInfo.map(info => (
-                <li key={info.label} className="hover:text-white cursor-pointer transition-all text-xs font-bold uppercase tracking-widest flex items-center gap-3 group">
-                  <info.icon size={16} className="text-slate-700 group-hover:text-red-600 transition-colors" />
-                  {info.label}
+                <li key={info.label}>
+                  <span className="text-xs text-slate-600 hover:text-[#1DB954] transition-colors cursor-pointer font-medium flex items-center gap-1.5">
+                    <info.icon size={10} className="text-slate-700" />
+                    {info.label}
+                  </span>
                 </li>
               ))}
+              <li>
+                <Link to="/join" className="text-xs text-[#1DB954] hover:text-white transition-colors font-bold flex items-center gap-1.5">
+                  ⚡ Join as Reporter
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* 4K Branding Section */}
-          <div className="flex flex-col items-center lg:items-end text-center lg:text-right">
-              <div className="flex flex-col">
-                <span className="text-white text-5xl font-[1000] italic tracking-tighter leading-none transform -skew-x-12">
-                  AP13 <span className="text-red-600">NEWS</span>
-                </span>
-                <span className="text-[9px] tracking-[0.5em] mt-3 text-slate-500 font-black uppercase leading-none">
-                  FlashReport Network
-                </span>
-              </div>
-              <p className="mt-6 text-[11px] font-medium leading-relaxed max-w-[200px] text-slate-600">
-                Delivering high-fidelity journalism across the digital landscape 24/7.
-              </p>
+          {/* Newsletter */}
+          <div>
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">
+              Newsletter
+            </h4>
+            <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+              Get daily briefings in your inbox.
+            </p>
+            <div className="flex gap-1">
+              <input
+                type="email"
+                placeholder="Email address"
+                className="flex-1 px-3 py-2 text-xs bg-[#181818] border border-slate-800 rounded-lg text-slate-300 outline-none focus:border-[#1DB954] transition-colors"
+              />
+              <button className="bg-[#1DB954] hover:bg-[#1ed760] text-black px-3 py-2 rounded-lg text-xs font-black transition-colors">
+                →
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-700 mt-2">
+              No spam. Unsubscribe anytime.
+            </p>
           </div>
         </div>
+      </div>
 
-        {/* 3. COPYRIGHT */}
-        <div className="pt-8 border-t border-slate-900/50 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-bold text-slate-700 uppercase tracking-widest">
-          <p>© {new Date().getFullYear()} AP13 News Network. All Rights Reserved.</p>
+      {/* ── BOTTOM BAR ── */}
+      <div className="border-t border-slate-900 py-3 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 text-[10px] text-slate-700 font-semibold uppercase tracking-widest">
+          <p>© {year} AP13 News Network · All Rights Reserved</p>
           <div className="flex items-center gap-4">
-            <span className="hover:text-red-600 cursor-pointer transition-colors">Privacy Policy</span>
-            <span className="w-1 h-1 bg-slate-800 rounded-full"></span>
-            <span className="hover:text-red-600 cursor-pointer transition-colors">Terms of Service</span>
-            <span className="w-1 h-1 bg-slate-800 rounded-full"></span>
-            <p className="text-red-900/40">DevID: AP13_PRO_2026</p>
+            <span className="hover:text-[#1DB954] cursor-pointer transition-colors">Privacy</span>
+            <span className="w-0.5 h-3 bg-slate-800 rounded" />
+            <span className="hover:text-[#1DB954] cursor-pointer transition-colors">Terms</span>
+            <span className="w-0.5 h-3 bg-slate-800 rounded" />
+            <span className="text-slate-800">DevID: AP13_PRO_2026</span>
           </div>
         </div>
       </div>

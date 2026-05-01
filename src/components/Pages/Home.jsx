@@ -1,15 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { newsService } from '../../services/api';
 import { navItems } from '../../Navbar/navdata';
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 const ACTIVE_CATS = ['Global', 'National', 'Business', 'Sports', 'Entertainment', 'Health', 'Politics', 'Crime', 'State'];
+
 const CAT_COLORS = {
-  Global: '#3b82f6', National: '#10b981', Business: '#8b5cf6',
-  Sports: '#f97316', Entertainment: '#ec4899', Health: '#14b8a6',
-  Politics: '#6366f1', Crime: '#ef4444', State: '#f59e0b',
+  Global: '#1DB954', National: '#1ed760', Business: '#1DB954',
+  Sports: '#17a349', Entertainment: '#1DB954', Health: '#148a3f',
+  Politics: '#1DB954', Crime: '#117a35', State: '#1ed760',
 };
+
+// Spotify green palette
+const SPOTIFY_GREEN  = '#1DB954';
+const SPOTIFY_DARK   = '#FFFFFF';
+const SPOTIFY_CARD   = '#181818';
+const SPOTIFY_HOVER  = '#282828';
+const SPOTIFY_LIGHT  = '#b3b3b3';
 
 // ─── LIVE CLOCK ───────────────────────────────────────────────────────────────
 function LiveClock() {
@@ -27,55 +35,78 @@ function LiveClock() {
   );
 }
 
-// ─── SKELETON LOADER ──────────────────────────────────────────────────────────
-function Skeleton({ w = '100%', h = 200, r = 8 }) {
+// ─── SKELETON ─────────────────────────────────────────────────────────────────
+function Skeleton({ h = 200, r = 8 }) {
   return (
     <div style={{
-      width: w, height: h, borderRadius: r,
-      background: 'linear-gradient(90deg, #1e293b 25%, #263348 50%, #1e293b 75%)',
+      width: '100%', height: h, borderRadius: r,
+      background: `linear-gradient(90deg, ${SPOTIFY_CARD} 25%, ${SPOTIFY_HOVER} 50%, ${SPOTIFY_CARD} 75%)`,
       backgroundSize: '200% 100%',
       animation: 'shimmer 1.5s infinite',
     }} />
   );
 }
 
-// ─── NEWS CARD ────────────────────────────────────────────────────────────────
-function NewsCard({ item, category, size = 'sm', style: extraStyle }) {
-  const [imgErr, setImgErr] = useState(false);
-  const color = CAT_COLORS[category] || '#ef4444';
-  const path = `/category/${category?.toLowerCase()}`;
+// ─── Universal field extractor ────────────────────────────────────────────────
+function extract(item) {
+  if (!item) return { title: '', description: '', imageUrl: '' };
+  return {
+    title: item.title || item.matchTitle || item.movieTitle || item.companyName || item.gadgetHead || item.headline || 'AP13 Update',
+    description: item.description || item.summary || item.analysis || item.gossipContent || item.medicalAdvice || item.techReview || '',
+    imageUrl: item.imageUrl || item.image || '',
+  };
+}
 
-  const title = item?.title || item?.matchTitle || item?.movieTitle ||
-    item?.companyName || item?.gadgetHead || 'AP13 News Update';
-  const desc = item?.description || item?.summary || item?.analysis ||
-    item?.gossipContent || item?.medicalAdvice || '';
-  const img = item?.imageUrl;
+// ─── Safe Image ───────────────────────────────────────────────────────────────
+function SafeImg({ src, alt, style, className }) {
+  const [err, setErr] = useState(false);
+  if (!src || err) {
+    return (
+      <div style={{
+        ...style,
+        background: `linear-gradient(135deg, ${SPOTIFY_CARD}, ${SPOTIFY_HOVER})`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }} className={className}>
+        <span style={{ fontSize: 32, opacity: 0.15 }}>📰</span>
+      </div>
+    );
+  }
+  return (
+    <img
+      src={src} alt={alt || ''}
+      style={style} className={className}
+      onError={() => setErr(true)}
+    />
+  );
+}
+
+// ─── NEWS CARD ────────────────────────────────────────────────────────────────
+function NewsCard({ item, category, size = 'sm' }) {
+  const color = CAT_COLORS[category] || SPOTIFY_GREEN;
+  const path  = `/category/${category?.toLowerCase()}`;
+  const { title, description, imageUrl } = extract(item);
 
   if (size === 'hero') {
     return (
-      <Link to={path} style={{ textDecoration: 'none', display: 'block', ...extraStyle }}>
+      <Link to={path} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
         <div style={{
-          position: 'relative', height: '100%', minHeight: 480,
-          borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
+          position: 'relative', height: '100%', minHeight: 440,
+          borderRadius: 12, overflow: 'hidden', cursor: 'pointer',
+          background: SPOTIFY_CARD,
         }}>
-          {img && !imgErr ? (
-            <img src={img} alt={title} onError={() => setImgErr(true)}
-              style={{
-                width: '100%', height: '100%', objectFit: 'cover', display: 'block',
-                transition: 'transform 0.8s ease',
-              }} />
-          ) : (
-            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #0f172a, #1e293b)' }} />
-          )}
+          <SafeImg
+            src={imageUrl} alt={title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.8s ease' }}
+          />
           <div style={{
             position: 'absolute', inset: 0,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.1) 100%)',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.1) 100%)',
           }} />
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '28px 28px 32px' }}>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px 24px 28px' }}>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               background: color, borderRadius: 4,
-              padding: '3px 10px', marginBottom: 12,
+              padding: '3px 10px', marginBottom: 10,
             }}>
               <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#fff', animation: 'blink 1.2s infinite' }} />
               <span style={{ fontSize: 9, fontWeight: 800, color: '#fff', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: "'Oswald', sans-serif" }}>
@@ -83,15 +114,14 @@ function NewsCard({ item, category, size = 'sm', style: extraStyle }) {
               </span>
             </div>
             <h2 style={{
-              fontSize: 'clamp(20px, 3vw, 32px)', fontWeight: 800, color: '#fff',
+              fontSize: 'clamp(18px, 2.5vw, 28px)', fontWeight: 800, color: '#fff',
               fontFamily: "'Oswald', sans-serif", fontStyle: 'italic',
-              lineHeight: 1.15, letterSpacing: '-0.01em',
-              margin: '0 0 10px', textTransform: 'uppercase',
+              lineHeight: 1.15, margin: '0 0 8px', textTransform: 'uppercase',
               textShadow: '0 2px 20px rgba(0,0,0,0.5)',
             }}>{title}</h2>
-            {desc && (
-              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, lineHeight: 1.6, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                {desc}
+            {description && (
+              <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 12, lineHeight: 1.6, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                {description}
               </p>
             )}
           </div>
@@ -103,18 +133,19 @@ function NewsCard({ item, category, size = 'sm', style: extraStyle }) {
   if (size === 'md') {
     return (
       <Link to={path} style={{ textDecoration: 'none' }}>
-        <div className="news-card-hover" style={{
-          background: '#0f172a', borderRadius: 12, overflow: 'hidden',
-          border: '1px solid #1e293b', height: '100%',
-          transition: 'transform 0.2s, border-color 0.2s',
-        }}>
-          <div style={{ position: 'relative', height: 160, overflow: 'hidden' }}>
-            {img && !imgErr ? (
-              <img src={img} alt={title} onError={() => setImgErr(true)}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s' }} />
-            ) : (
-              <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${color}20, #0f172a)` }} />
-            )}
+        <div style={{
+          background: SPOTIFY_CARD, borderRadius: 10, overflow: 'hidden',
+          border: `1px solid ${SPOTIFY_HOVER}`, height: '100%',
+          transition: 'background 0.2s, transform 0.2s',
+        }}
+          onMouseEnter={e => { e.currentTarget.style.background = SPOTIFY_HOVER; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = SPOTIFY_CARD; e.currentTarget.style.transform = 'none'; }}
+        >
+          <div style={{ position: 'relative', height: 150, overflow: 'hidden', background: SPOTIFY_HOVER }}>
+            <SafeImg
+              src={imageUrl} alt={title}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s', display: 'block' }}
+            />
             <div style={{ position: 'absolute', top: 8, left: 8 }}>
               <span style={{
                 background: color, color: '#fff', fontSize: 8, fontWeight: 800,
@@ -125,7 +156,7 @@ function NewsCard({ item, category, size = 'sm', style: extraStyle }) {
           </div>
           <div style={{ padding: '12px 14px 14px' }}>
             <h3 style={{
-              fontSize: 13, fontWeight: 700, color: '#e2e8f0', lineHeight: 1.4,
+              fontSize: 12, fontWeight: 700, color: '#fff', lineHeight: 1.4,
               margin: 0, display: '-webkit-box', WebkitLineClamp: 3,
               WebkitBoxOrient: 'vertical', overflow: 'hidden',
             }}>{title}</h3>
@@ -135,25 +166,25 @@ function NewsCard({ item, category, size = 'sm', style: extraStyle }) {
     );
   }
 
-  // sm — list item
+  // sm list item
   return (
     <Link to={path} style={{ textDecoration: 'none' }}>
-      <div className="news-card-hover" style={{
+      <div style={{
         display: 'flex', gap: 10, padding: '10px 0',
-        borderBottom: '1px solid #1e293b', transition: 'opacity 0.2s',
-      }}>
-        <div style={{ width: 64, height: 56, borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>
-          {img && !imgErr ? (
-            <img src={img} alt={title} onError={() => setImgErr(true)}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : (
-            <div style={{ width: '100%', height: '100%', background: `${color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: 18, opacity: 0.4 }}>📰</span>
-            </div>
-          )}
+        borderBottom: `1px solid ${SPOTIFY_HOVER}`,
+        transition: 'opacity 0.2s', cursor: 'pointer',
+      }}
+        onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+      >
+        <div style={{ width: 64, height: 52, borderRadius: 6, overflow: 'hidden', flexShrink: 0, background: SPOTIFY_HOVER }}>
+          <SafeImg
+            src={imageUrl} alt={title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
         </div>
         <p style={{
-          fontSize: 12, fontWeight: 600, color: '#94a3b8', lineHeight: 1.5,
+          fontSize: 11, fontWeight: 600, color: SPOTIFY_LIGHT, lineHeight: 1.5,
           margin: 0, display: '-webkit-box', WebkitLineClamp: 3,
           WebkitBoxOrient: 'vertical', overflow: 'hidden',
         }}>{title}</p>
@@ -164,8 +195,8 @@ function NewsCard({ item, category, size = 'sm', style: extraStyle }) {
 
 // ─── CATEGORY SECTION ─────────────────────────────────────────────────────────
 function CategorySection({ category, news }) {
-  const color = CAT_COLORS[category] || '#ef4444';
-  const path = `/category/${category.toLowerCase()}`;
+  const color = CAT_COLORS[category] || SPOTIFY_GREEN;
+  const path  = `/category/${category.toLowerCase()}`;
   const [main, ...rest] = news;
 
   return (
@@ -173,13 +204,13 @@ function CategorySection({ category, news }) {
       {/* Section header */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        marginBottom: 18, paddingBottom: 12,
+        marginBottom: 16, paddingBottom: 10,
         borderBottom: `2px solid ${color}`,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 4, height: 22, background: color, borderRadius: 2 }} />
+          <div style={{ width: 4, height: 20, background: color, borderRadius: 2 }} />
           <h2 style={{
-            fontSize: 22, fontWeight: 900, color: '#f1f5f9', margin: 0,
+            fontSize: 20, fontWeight: 900, color: '#fff', margin: 0,
             fontFamily: "'Oswald', sans-serif", fontStyle: 'italic',
             letterSpacing: '0.02em', textTransform: 'uppercase',
           }}>{category}</h2>
@@ -193,19 +224,17 @@ function CategorySection({ category, news }) {
         }}>View All →</Link>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
         {/* Main feature */}
         {main && (
-          <div style={{ gridColumn: '1 / 2', gridRow: '1 / 2' }}>
-            <NewsCard item={main} category={category} size="hero"
-              style={{ height: '100%', minHeight: 280 }} />
+          <div style={{ gridColumn: '1 / 2' }}>
+            <NewsCard item={main} category={category} size="hero" />
           </div>
         )}
-
         {/* Side cards */}
-        <div style={{ gridColumn: '2 / 4', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ gridColumn: '2 / 4', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           {rest.slice(0, 4).map((item, i) => (
-            <NewsCard key={i} item={item} category={category} size="md" />
+            <NewsCard key={item.id || i} item={item} category={category} size="md" />
           ))}
         </div>
       </div>
@@ -218,12 +247,12 @@ function SocialPill({ icon, label, count, url, color }) {
   return (
     <a href={url} target="_blank" rel="noreferrer" style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '10px 14px', borderRadius: 10,
-      background: '#0f172a', border: '1px solid #1e293b',
+      padding: '10px 14px', borderRadius: 8,
+      background: SPOTIFY_CARD, border: `1px solid ${SPOTIFY_HOVER}`,
       textDecoration: 'none', transition: 'border-color 0.2s',
     }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = color + '60'}
-      onMouseLeave={e => e.currentTarget.style.borderColor = '#1e293b'}
+      onMouseEnter={e => e.currentTarget.style.borderColor = color + '80'}
+      onMouseLeave={e => e.currentTarget.style.borderColor = SPOTIFY_HOVER}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div style={{
@@ -231,10 +260,10 @@ function SocialPill({ icon, label, count, url, color }) {
           background: color, display: 'flex', alignItems: 'center',
           justifyContent: 'center', fontSize: 12,
         }}>{icon}</div>
-        <span style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>{label}</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: SPOTIFY_LIGHT }}>{label}</span>
       </div>
       <span style={{
-        fontSize: 14, fontWeight: 900, color: '#f1f5f9',
+        fontSize: 14, fontWeight: 900, color: '#fff',
         fontFamily: "'Oswald', sans-serif", fontStyle: 'italic'
       }}>{count}</span>
     </a>
@@ -249,35 +278,35 @@ function TrendingSidebar({ allNews }) {
 
   return (
     <div style={{
-      background: '#0f172a', border: '1px solid #1e293b',
-      borderRadius: 14, overflow: 'hidden',
+      background: SPOTIFY_CARD, border: `1px solid ${SPOTIFY_HOVER}`,
+      borderRadius: 12, overflow: 'hidden',
     }}>
       <div style={{
-        padding: '14px 16px', borderBottom: '1px solid #1e293b',
-        background: 'linear-gradient(135deg, rgba(239,68,68,0.08), transparent)',
+        padding: '12px 16px', borderBottom: `1px solid ${SPOTIFY_HOVER}`,
         display: 'flex', alignItems: 'center', gap: 8,
+        background: `linear-gradient(135deg, ${SPOTIFY_GREEN}10, transparent)`,
       }}>
-        <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', animation: 'blink 1.2s infinite' }} />
+        <div style={{ width: 6, height: 6, borderRadius: '50%', background: SPOTIFY_GREEN, animation: 'blink 1.2s infinite' }} />
         <span style={{
-          fontSize: 11, fontWeight: 800, color: '#ef4444',
+          fontSize: 11, fontWeight: 800, color: SPOTIFY_GREEN,
           textTransform: 'uppercase', letterSpacing: '0.15em',
           fontFamily: "'Oswald', sans-serif"
         }}>Trending Now</span>
       </div>
       <div style={{ padding: '4px 16px 8px' }}>
         {trending.map((item, i) => {
-          const title = item?.title || item?.matchTitle || item?.movieTitle || item?.companyName || 'AP13 Update';
-          const color = CAT_COLORS[item.cat] || '#ef4444';
+          const { title } = extract(item);
+          const color = CAT_COLORS[item.cat] || SPOTIFY_GREEN;
           return (
             <Link key={i} to={`/category/${item.cat?.toLowerCase()}`} style={{ textDecoration: 'none' }}>
               <div style={{
                 display: 'flex', gap: 10, padding: '10px 0',
-                borderBottom: i < trending.length - 1 ? '1px solid #1e293b' : 'none',
+                borderBottom: i < trending.length - 1 ? `1px solid ${SPOTIFY_HOVER}` : 'none',
                 alignItems: 'flex-start',
               }}>
                 <span style={{
-                  fontSize: 18, fontWeight: 900, fontStyle: 'italic',
-                  color: '#1e293b', fontFamily: "'Oswald', sans-serif",
+                  fontSize: 16, fontWeight: 900, fontStyle: 'italic',
+                  color: SPOTIFY_HOVER, fontFamily: "'Oswald', sans-serif",
                   lineHeight: 1, flexShrink: 0, minWidth: 24,
                 }}>{String(i + 1).padStart(2, '0')}</span>
                 <div>
@@ -287,7 +316,7 @@ function TrendingSidebar({ allNews }) {
                     fontFamily: "'Oswald', sans-serif", marginBottom: 3,
                   }}>{item.cat}</div>
                   <p style={{
-                    fontSize: 12, fontWeight: 600, color: '#94a3b8',
+                    fontSize: 11, fontWeight: 600, color: SPOTIFY_LIGHT,
                     margin: 0, lineHeight: 1.5,
                     display: '-webkit-box', WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical', overflow: 'hidden',
@@ -306,25 +335,27 @@ function TrendingSidebar({ allNews }) {
 function WeatherWidget() {
   return (
     <div style={{
-      background: '#0f172a', border: '1px solid #1e293b',
-      borderRadius: 14, padding: '16px', marginBottom: 16,
+      background: SPOTIFY_CARD, border: `1px solid ${SPOTIFY_HOVER}`,
+      borderRadius: 12, padding: '14px', marginBottom: 14,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <p style={{ fontSize: 9, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 4px' }}>Hyderabad</p>
+          <p style={{ fontSize: 9, fontWeight: 700, color: SPOTIFY_LIGHT, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 4px' }}>
+            Hyderabad
+          </p>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-            <span style={{ fontSize: 36, fontWeight: 900, color: '#f1f5f9', fontFamily: "'Oswald', sans-serif", lineHeight: 1 }}>34°</span>
-            <span style={{ fontSize: 13, color: '#64748b' }}>C</span>
+            <span style={{ fontSize: 34, fontWeight: 900, color: '#fff', fontFamily: "'Oswald', sans-serif", lineHeight: 1 }}>34°</span>
+            <span style={{ fontSize: 12, color: SPOTIFY_LIGHT }}>C</span>
           </div>
-          <p style={{ fontSize: 11, color: '#475569', margin: '4px 0 0' }}>Partly Cloudy</p>
+          <p style={{ fontSize: 11, color: SPOTIFY_LIGHT, margin: '4px 0 0' }}>Partly Cloudy</p>
         </div>
-        <span style={{ fontSize: 40 }}>⛅</span>
+        <span style={{ fontSize: 36 }}>⛅</span>
       </div>
-      <div style={{ display: 'flex', gap: 12, marginTop: 12, paddingTop: 12, borderTop: '1px solid #1e293b' }}>
+      <div style={{ display: 'flex', gap: 10, marginTop: 10, paddingTop: 10, borderTop: `1px solid ${SPOTIFY_HOVER}` }}>
         {[{ label: 'Humidity', val: '68%' }, { label: 'Wind', val: '14 km/h' }, { label: 'UV', val: 'High' }].map(w => (
           <div key={w.label} style={{ flex: 1 }}>
-            <p style={{ fontSize: 9, color: '#334155', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 2px' }}>{w.label}</p>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#64748b', margin: 0 }}>{w.val}</p>
+            <p style={{ fontSize: 9, color: '#535353', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 2px' }}>{w.label}</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: SPOTIFY_LIGHT, margin: 0 }}>{w.val}</p>
           </div>
         ))}
       </div>
@@ -335,9 +366,8 @@ function WeatherWidget() {
 // ─── MAIN HOME PAGE ───────────────────────────────────────────────────────────
 export default function Home() {
   const [categoryNews, setCategoryNews] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('All');
-  const tickerRef = useRef(null);
+  const [loading,      setLoading]      = useState(true);
+  const [activeTab,    setActiveTab]    = useState('All');
 
   const activeSections = navItems.filter(i => ACTIVE_CATS.includes(i.label));
 
@@ -377,32 +407,33 @@ export default function Home() {
         @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
         @keyframes blink   { 0%,100%{opacity:1} 50%{opacity:0.3} }
         @keyframes fadeUp  { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes ticker  { from{transform:translateX(100%)} to{transform:translateX(-100%)} }
-        .news-card-hover:hover { opacity: 0.88; }
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
       `}</style>
 
       <div style={{
-        minHeight: '100vh', background: '#020617',
+        minHeight: '100vh',
+        background: SPOTIFY_DARK,
         fontFamily: "'Source Serif 4', Georgia, serif",
-        color: '#e2e8f0', paddingBottom: 80,
+        color: '#e2e8f0',
+        paddingBottom: 80,
       }}>
 
         {/* ── TOP META BAR ── */}
         <div style={{
-          background: '#0a0f1e', borderBottom: '1px solid #1e293b',
+          background: '#0a0a0a',
+          borderBottom: `1px solid ${SPOTIFY_HOVER}`,
           padding: '6px 24px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          fontSize: 11, color: '#334155', fontFamily: "'Oswald', sans-serif",
+          fontSize: 11, color: '#535353', fontFamily: "'Oswald', sans-serif",
           letterSpacing: '0.05em',
         }}>
           <LiveClock />
           <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-            <span style={{ color: '#22c55e', fontWeight: 700 }}>● LIVE</span>
+            <span style={{ color: SPOTIFY_GREEN, fontWeight: 700 }}>● LIVE</span>
             <span>Hyderabad · TS · India</span>
-            <span style={{ color: '#ef4444' }}>Breaking News 24/7</span>
+            <span style={{ color: SPOTIFY_GREEN }}>Breaking News 24/7</span>
           </div>
         </div>
 
@@ -410,29 +441,27 @@ export default function Home() {
 
           {/* ── HERO GRID ── */}
           {loading ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, marginBottom: 40 }}>
-              <Skeleton h={480} />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <Skeleton h={228} /> <Skeleton h={228} />
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 14, marginBottom: 36 }}>
+              <Skeleton h={440} r={12} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <Skeleton h={210} r={12} />
+                <Skeleton h={210} r={12} />
               </div>
             </div>
           ) : heroItems.length > 0 ? (
             <div style={{
               display: 'grid',
               gridTemplateColumns: heroItems.length === 1 ? '1fr' : '2fr 1fr',
-              gap: 16, marginBottom: 40,
+              gap: 14, marginBottom: 36,
               animation: 'fadeUp 0.6s ease',
             }}>
-              {/* Main hero */}
               {heroItems[0] && (
                 <NewsCard item={heroItems[0].item} category={heroItems[0].cat} size="hero" />
               )}
-              {/* Side heroes */}
               {heroItems.length > 1 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   {heroItems.slice(1).map(({ cat, item }, i) => (
-                    <NewsCard key={i} item={item} category={cat} size="hero"
-                      style={{ flex: 1, minHeight: 0 }} />
+                    <NewsCard key={i} item={item} category={cat} size="hero" />
                   ))}
                 </div>
               )}
@@ -442,19 +471,17 @@ export default function Home() {
           {/* ── CATEGORY TABS ── */}
           <div style={{
             display: 'flex', gap: 4, overflowX: 'auto',
-            marginBottom: 32, paddingBottom: 4,
-            scrollbarWidth: 'none',
+            marginBottom: 28, paddingBottom: 4, scrollbarWidth: 'none',
           }}>
             {tabs.map(tab => {
               const active = activeTab === tab;
-              const color = CAT_COLORS[tab] || '#ef4444';
               return (
                 <button key={tab} onClick={() => setActiveTab(tab)} style={{
-                  padding: '6px 14px', borderRadius: 6, flexShrink: 0,
-                  background: active ? color : '#0f172a',
-                  border: `1px solid ${active ? color : '#1e293b'}`,
-                  color: active ? '#fff' : '#64748b',
-                  cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                  padding: '6px 14px', borderRadius: 20, flexShrink: 0,
+                  background: active ? SPOTIFY_GREEN : SPOTIFY_CARD,
+                  border: `1px solid ${active ? SPOTIFY_GREEN : SPOTIFY_HOVER}`,
+                  color: active ? '#000' : SPOTIFY_LIGHT,
+                  cursor: 'pointer', fontSize: 11, fontWeight: 800,
                   fontFamily: "'Oswald', sans-serif",
                   textTransform: 'uppercase', letterSpacing: '0.1em',
                   transition: 'all 0.2s',
@@ -463,85 +490,79 @@ export default function Home() {
             })}
           </div>
 
-          {/* ── MAIN CONTENT + SIDEBAR ── */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 32, alignItems: 'start' }}>
+          {/* ── MAIN + SIDEBAR ── */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 32, alignItems: 'start' }}>
 
             {/* Content */}
             <div>
               {loading ? (
-                [1, 2, 3].map(i => <Skeleton key={i} h={300} style={{ marginBottom: 40 }} />)
+                [1, 2, 3].map(i => <div key={i} style={{ marginBottom: 40 }}><Skeleton h={280} r={12} /></div>)
               ) : (
                 displaySections.map(cat => {
                   const news = categoryNews[cat.label] || [];
                   if (!news.length) return null;
-                  return (
-                    <CategorySection key={cat.label} category={cat.label} news={news} />
-                  );
+                  return <CategorySection key={cat.label} category={cat.label} news={news} />;
                 })
               )}
             </div>
 
             {/* Sidebar */}
-            <aside style={{ position: 'sticky', top: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <aside style={{ position: 'sticky', top: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-              {/* Weather */}
               <WeatherWidget />
 
-              {/* Trending */}
               {!loading && Object.keys(categoryNews).length > 0 && (
                 <TrendingSidebar allNews={categoryNews} />
               )}
 
-              {/* Social stats */}
+              {/* Social */}
               <div style={{
-                background: '#0f172a', border: '1px solid #1e293b',
-                borderRadius: 14, overflow: 'hidden',
+                background: SPOTIFY_CARD, border: `1px solid ${SPOTIFY_HOVER}`,
+                borderRadius: 12, overflow: 'hidden',
               }}>
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid #1e293b' }}>
+                <div style={{ padding: '11px 16px', borderBottom: `1px solid ${SPOTIFY_HOVER}` }}>
                   <span style={{
-                    fontSize: 10, fontWeight: 800, color: '#475569',
+                    fontSize: 10, fontWeight: 800, color: SPOTIFY_LIGHT,
                     textTransform: 'uppercase', letterSpacing: '0.15em',
                     fontFamily: "'Oswald', sans-serif"
                   }}>Follow AP13</span>
                 </div>
                 <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <SocialPill icon="▶" label="YouTube" count="8.5K" url="https://youtube.com/@ap13news" color="#ef4444" />
-                  <SocialPill icon="f" label="Facebook" count="1.2M" url="https://facebook.com/apnewslocal" color="#1877f2" />
-                  <SocialPill icon="📸" label="Instagram" count="420K" url="https://instagram.com/ap13news_telugu" color="#e1306c" />
+                  <SocialPill icon="▶" label="YouTube"   count="8.5K"  url="https://youtube.com/@ap13news"             color="#ef4444" />
+                  <SocialPill icon="f" label="Facebook"  count="1.2M"  url="https://facebook.com/apnewslocal"          color="#1877f2" />
+                  <SocialPill icon="📸" label="Instagram" count="420K" url="https://instagram.com/ap13news_telugu"     color="#e1306c" />
                 </div>
               </div>
 
               {/* Join reporter CTA */}
               <Link to="/join" style={{ textDecoration: 'none' }}>
                 <div style={{
-                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                  borderRadius: 14, padding: '18px 16px',
+                  background: `linear-gradient(135deg, ${SPOTIFY_GREEN} 0%, #17a349 100%)`,
+                  borderRadius: 12, padding: '16px',
                   position: 'relative', overflow: 'hidden', cursor: 'pointer',
                 }}>
                   <div style={{
                     position: 'absolute', top: -20, right: -20,
                     width: 80, height: 80, borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.08)',
+                    background: 'rgba(255,255,255,0.1)',
                   }} />
                   <p style={{
-                    fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.7)',
+                    fontSize: 9, fontWeight: 800, color: 'rgba(0,0,0,0.6)',
                     textTransform: 'uppercase', letterSpacing: '0.2em',
-                    fontFamily: "'Oswald', sans-serif", margin: '0 0 6px'
+                    fontFamily: "'Oswald', sans-serif", margin: '0 0 5px'
                   }}>Now Recruiting</p>
                   <p style={{
-                    fontSize: 18, fontWeight: 900, fontStyle: 'italic',
-                    color: '#fff', fontFamily: "'Oswald', sans-serif",
+                    fontSize: 17, fontWeight: 900, fontStyle: 'italic',
+                    color: '#000', fontFamily: "'Oswald', sans-serif",
                     margin: '0 0 8px', lineHeight: 1.2
-                  }}>
-                    Become an AP13 Reporter
-                  </p>
-                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', margin: '0 0 12px', lineHeight: 1.5 }}>
+                  }}>Become an AP13 Reporter</p>
+                  <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.6)', margin: '0 0 10px', lineHeight: 1.5 }}>
                     Join Hyderabad's fastest-growing digital news network.
                   </p>
                   <div style={{
                     display: 'inline-flex', alignItems: 'center', gap: 6,
-                    background: '#fff', color: '#ef4444',
-                    borderRadius: 6, padding: '6px 14px',
+                    background: '#000', color: SPOTIFY_GREEN,
+                    borderRadius: 20, padding: '6px 14px',
                     fontSize: 11, fontWeight: 800,
                     fontFamily: "'Oswald', sans-serif",
                     textTransform: 'uppercase', letterSpacing: '0.1em',
@@ -551,10 +572,10 @@ export default function Home() {
 
               {/* YouTube embed */}
               <div style={{
-                background: '#0f172a', border: '1px solid #1e293b',
-                borderRadius: 14, overflow: 'hidden',
+                background: SPOTIFY_CARD, border: `1px solid ${SPOTIFY_HOVER}`,
+                borderRadius: 12, overflow: 'hidden',
               }}>
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ padding: '11px 16px', borderBottom: `1px solid ${SPOTIFY_HOVER}`, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', animation: 'blink 1.2s infinite' }} />
                   <span style={{
                     fontSize: 10, fontWeight: 800, color: '#ef4444',
@@ -562,19 +583,20 @@ export default function Home() {
                     fontFamily: "'Oswald', sans-serif"
                   }}>Live on YouTube</span>
                 </div>
-                <div style={{ padding: 12 }}>
+                <div style={{ padding: 10 }}>
                   <a href="https://www.youtube.com/@ap13news" target="_blank" rel="noreferrer" style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    height: 120, background: '#020617', borderRadius: 8,
-                    textDecoration: 'none', flexDirection: 'column', gap: 8, border: '1px solid #1e293b',
+                    height: 100, background: '#0a0a0a', borderRadius: 8,
+                    textDecoration: 'none', flexDirection: 'column', gap: 8,
+                    border: `1px solid ${SPOTIFY_HOVER}`,
                   }}>
                     <div style={{
-                      width: 48, height: 48, borderRadius: '50%',
+                      width: 44, height: 44, borderRadius: '50%',
                       background: '#ef4444', display: 'flex',
-                      alignItems: 'center', justifyContent: 'center', fontSize: 20,
+                      alignItems: 'center', justifyContent: 'center', fontSize: 18,
                     }}>▶</div>
                     <span style={{
-                      fontSize: 11, fontWeight: 700, color: '#64748b',
+                      fontSize: 11, fontWeight: 700, color: SPOTIFY_LIGHT,
                       fontFamily: "'Oswald', sans-serif", letterSpacing: '0.05em'
                     }}>Watch AP13 Live</span>
                   </a>
