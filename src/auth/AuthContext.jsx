@@ -1,14 +1,11 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 
-// ─── API BASE URL ─────────────────────────────────────────────────────────────
 const BASE_URL = window.location.hostname === "localhost"
   ? "http://localhost:8080/api"
   : "https://18.61.229.102.nip.io/api";
 
-// ─── Context ──────────────────────────────────────────────────────────────────
 const AuthContext = createContext(null);
 
-// ─── Safe localStorage wrapper ────────────────────────────────────────────────
 function safeStorage() {
   try {
     localStorage.setItem("__ap13_test__", "1");
@@ -26,12 +23,10 @@ function safeStorage() {
 }
 const storage = safeStorage();
 
-// ─── Safe JSON parse ──────────────────────────────────────────────────────────
 function safeJson(str) {
   try { return JSON.parse(str); } catch { return null; }
 }
 
-// ─── AuthProvider ─────────────────────────────────────────────────────────────
 export function AuthProvider({ children }) {
   const [user,    setUser]    = useState(null);
   const [token,   setToken]   = useState(null);
@@ -42,21 +37,14 @@ export function AuthProvider({ children }) {
     try {
       const t = storage.getItem("ap13_token");
       const u = safeJson(storage.getItem("ap13_user"));
-      if (t && u) {
-        setToken(t);
-        setUser(u);
-      }
-    } catch {
-      storage.clear();
-    } finally {
-      setLoading(false);
-    }
+      if (t && u) { setToken(t); setUser(u); }
+    } catch { storage.clear(); }
+    finally { setLoading(false); }
   }, []);
 
   const login = useCallback(async (username, password) => {
     const controller = new AbortController();
     const timeoutId  = setTimeout(() => controller.abort(), 20000);
-
     try {
       const res = await fetch(`${BASE_URL}/auth/login`, {
         method:  "POST",
@@ -67,8 +55,8 @@ export function AuthProvider({ children }) {
       clearTimeout(timeoutId);
 
       let data;
-      const contentType = res.headers.get("content-type") || "";
-      if (contentType.includes("application/json")) {
+      const ct = res.headers.get("content-type") || "";
+      if (ct.includes("application/json")) {
         data = await res.json().catch(() => ({}));
       } else {
         const text = await res.text().catch(() => "");
@@ -84,7 +72,6 @@ export function AuthProvider({ children }) {
            `Login failed (${res.status}).`)
         );
       }
-
       if (!data?.token) throw new Error("Invalid response — missing token.");
       if (!data?.user)  throw new Error("Invalid response — missing user.");
 
@@ -96,12 +83,9 @@ export function AuthProvider({ children }) {
 
     } catch (err) {
       clearTimeout(timeoutId);
-      if (err.name === "AbortError") {
-        throw new Error("Server timeout. Please try again.");
-      }
-      if (err.message === "Failed to fetch" || err.message.includes("NetworkError")) {
+      if (err.name === "AbortError") throw new Error("Server timeout. Please try again.");
+      if (err.message === "Failed to fetch" || err.message.includes("NetworkError"))
         throw new Error("Cannot reach the server. Check your connection.");
-      }
       throw err;
     }
   }, []);
@@ -114,12 +98,16 @@ export function AuthProvider({ children }) {
   }, []);
 
   const isAuthenticated = !!token && !!user;
-  const isAdmin = user?.role === "ADMIN" || user?.role === "ROLE_ADMIN";
+  const isAdmin         = user?.role === "ADMIN"    || user?.role === "ROLE_ADMIN";
+  // REPORTER gets access to the news publishing panel
+  const isReporter      = user?.role === "REPORTER" || user?.role === "ROLE_REPORTER";
+  // Both admin and reporter can access the admin dashboard
+  const canAccessAdmin  = isAdmin || isReporter;
 
   return (
     <AuthContext.Provider value={{
       user, token, loading,
-      isAuthenticated, isAdmin,
+      isAuthenticated, isAdmin, isReporter, canAccessAdmin,
       login, logout,
     }}>
       {children}
@@ -127,7 +115,6 @@ export function AuthProvider({ children }) {
   );
 }
 
-// ─── useAuth hook — separate export fixes ESLint warning ─────────────────────
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);

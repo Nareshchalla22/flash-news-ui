@@ -4,7 +4,7 @@ import apiClient from '../../../services/api';
 
 // ─── CONFIG — change these to your actual UPI details ────────────────────────
 const UPI_CONFIG = {
-  upiId:    'ap13news@upi',          // ← your UPI ID
+  upiId:    '8096816932@ybl',          // ← your UPI ID
   name:     'AP13 News Network',
   merchant: 'AP13MEDIA',
 };

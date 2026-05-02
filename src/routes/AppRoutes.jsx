@@ -1,9 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 
-// --- Core Pages ---
-import Home from '../components/Pages/Home';
-
-// --- Category Pages ---
+import Home              from '../components/Pages/Home';
 import GlobalPage        from '../components/Pages/category/GlobalPage';
 import NationalPage      from '../components/Pages/category/NationalPage';
 import StatePage         from '../components/Pages/category/StatePage';
@@ -16,76 +13,63 @@ import PoliticsPage      from '../components/Pages/category/PoliticsPage';
 import TravelPage        from '../components/Pages/category/TravelPage';
 import TrendingPage      from '../components/Pages/category/TrendingPage';
 import LiveTVPage        from '../components/Pages/category/LiveTVPage';
-
-// --- NEW: All News Feed ---
 import AllNewsFeedPage   from '../components/Pages/feed/AllNewsFeedPage';
 
-// --- Admin / Manager Pages ---
-import UpdateNews        from '../components/Pages/Form/UpdateNews';
-import TickerManager     from '../components/Pages/Ticker/TickerManager';
-import AdminDashboard    from '../components/Admin/AdminDashboard';
+import UpdateNews            from '../components/Pages/Form/UpdateNews';
+import TickerManager         from '../components/Pages/Ticker/TickerManager';
+import AdminDashboard        from '../components/Admin/AdminDashboard';
 import AdminApplicationsPage from '../components/Admin/Adminapplicationspage';
 
-// --- Auth ---
-import LoginPage         from '../auth/LoginPage';
-import UnauthorizedPage  from '../auth/UnauthorizedPage';
+import LoginPage        from '../auth/LoginPage';
+import UnauthorizedPage from '../auth/UnauthorizedPage';
 import { ProtectedRoute, PublicOnlyRoute } from '../auth/ProtectedRoute';
-import ReporterJoinPage  from '../components/Pages/pressid/Reporterjoinpage';
+import ReporterJoinPage from '../components/Pages/pressid/Reporterjoinpage';
 
 const AppRoutes = () => {
   return (
     <Routes>
 
       {/* ── Public ── */}
-      <Route path="/"              element={<Home />} />
-
-      {/* ── All News Feed ── */}
-      <Route path="/news-feed"     element={<AllNewsFeedPage />} />
-
-      {/* ── Category pages ── */}
-      <Route path="/global"        element={<GlobalPage />} />
-      <Route path="/national"      element={<NationalPage />} />
-      <Route path="/state"         element={<StatePage />} />
-      <Route path="/business"      element={<BusinessPage />} />
-      <Route path="/crime"         element={<CrimePage />} />
-      <Route path="/entertainment" element={<EntertainmentPage />} />
-      <Route path="/sports"        element={<SportsPage />} />
-      <Route path="/health"        element={<HealthPage />} />
+      <Route path="/"               element={<Home />} />
+      <Route path="/news-feed"      element={<AllNewsFeedPage />} />
+      <Route path="/global"         element={<GlobalPage />} />
+      <Route path="/national"       element={<NationalPage />} />
+      <Route path="/state"          element={<StatePage />} />
+      <Route path="/business"       element={<BusinessPage />} />
+      <Route path="/crime"          element={<CrimePage />} />
+      <Route path="/entertainment"  element={<EntertainmentPage />} />
+      <Route path="/sports"         element={<SportsPage />} />
+      <Route path="/health"         element={<HealthPage />} />
       <Route path="/category/:name" element={<PoliticsPage />} />
-      <Route path="/travel"        element={<TravelPage />} />
-      <Route path="/trending"      element={<TrendingPage />} />
-      <Route path="/live-tv"       element={<LiveTVPage />} />
+      <Route path="/travel"         element={<TravelPage />} />
+      <Route path="/trending"       element={<TrendingPage />} />
+      <Route path="/live-tv"        element={<LiveTVPage />} />
+      <Route path="/unauthorized"   element={<UnauthorizedPage />} />
+      <Route path="/join"           element={<ReporterJoinPage />} />
 
-      {/* ── Misc public ── */}
-      <Route path="/unauthorized"  element={<UnauthorizedPage />} />
-      <Route path="/join"          element={<ReporterJoinPage />} />
-
-      {/* ── Login: redirect away if already signed in ── */}
+      {/* ── Login ── */}
       <Route path="/login" element={
-        <PublicOnlyRoute>
-          <LoginPage />
-        </PublicOnlyRoute>
+        <PublicOnlyRoute><LoginPage /></PublicOnlyRoute>
       } />
 
-      {/* ── Admin only ── */}
+      {/* ── REPORTER + ADMIN: news publishing ── */}
       <Route path="/admin" element={
-        <ProtectedRoute requireAdmin>
+        <ProtectedRoute requireReporter>
           <AdminDashboard />
         </ProtectedRoute>
       } />
-
       <Route path="/update-data" element={
-        <ProtectedRoute requireAdmin>
+        <ProtectedRoute requireReporter>
           <UpdateNews />
         </ProtectedRoute>
       } />
 
+      {/* ── ADMIN ONLY ── */}
       <Route path="/ticker-control" element={
         <ProtectedRoute requireAdmin>
           <TickerManager />
         </ProtectedRoute>
       } />
-
       <Route path="/admin/applications" element={
         <ProtectedRoute requireAdmin>
           <AdminApplicationsPage />
@@ -95,22 +79,17 @@ const AppRoutes = () => {
       {/* ── 404 ── */}
       <Route path="*" element={
         <div style={{
-          minHeight: '60vh', display: 'flex', alignItems: 'center',
-          justifyContent: 'center', flexDirection: 'column', gap: 12,
-          background: '#0f0f0f', color: '#374151',
+          minHeight: "60vh", display: "flex", alignItems: "center",
+          justifyContent: "center", flexDirection: "column", gap: 12,
+          background: "#0f0f0f",
         }}>
           <span style={{ fontSize: 64 }}>📡</span>
-          <h2 style={{
-            fontSize: 40, fontWeight: 900, fontStyle: 'italic',
-            color: '#374151', textTransform: 'uppercase', margin: 0,
-            fontFamily: "'Oswald', sans-serif",
-          }}>404 — Signal Lost</h2>
-          <a href="/" style={{ color: '#1DB954', fontWeight: 700, fontSize: 13 }}>
-            ← Return to Home
-          </a>
+          <h2 style={{ fontSize: 36, fontWeight: 900, color: "#374151", textTransform: "uppercase", margin: 0 }}>
+            404 — Signal Lost
+          </h2>
+          <a href="/" style={{ color: "#1DB954", fontWeight: 700, fontSize: 13 }}>← Return to Home</a>
         </div>
       } />
-
     </Routes>
   );
 };
