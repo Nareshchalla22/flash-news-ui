@@ -47,7 +47,7 @@ const Ticker = () => {
 
         /* Mobile: faster (12s) */
         .ap13-ticker-track {
-          animation: ap13ticker 20 linear infinite;
+          animation: ap13ticker 12s linear infinite;
           white-space: nowrap;
           will-change: transform;
           display: inline-block;
