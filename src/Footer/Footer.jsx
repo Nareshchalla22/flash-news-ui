@@ -1,12 +1,22 @@
 import React from 'react';
 import { socialLinks, footerInfo, navItems } from '../Navbar/navdata';
 import { Link } from 'react-router-dom';
+import { useLang } from '../i18n/LanguageContext';
 
 const Footer = () => {
+  const { t } = useLang();
   const year = new Date().getFullYear();
+
   const categories = navItems
-    .filter(i => !['Home', 'System Update', 'Login', 'Live TV', 'Trending', 'ID Card', 'Admin'].includes(i.label))
+    .filter(i => !['Home', 'System Update', 'Login', 'Live TV', 'Trending', 'ID Card', 'Admin', 'News Feed'].includes(i.label))
     .slice(0, 8);
+
+  // Map nav label to translation key
+  const navKey = {
+    Global: "global", National: "national", State: "state",
+    Business: "business", Crime: "crime", Entertainment: "entertainment",
+    Sports: "sports", Health: "health", Politics: "politics", Travel: "travel",
+  };
 
   return (
     <footer className="bg-[#0a0a0a] text-slate-500 border-t-2 border-[#1DB954]">
@@ -29,7 +39,7 @@ const Footer = () => {
               FlashReport Network
             </p>
             <p className="text-xs text-slate-600 leading-relaxed mb-4">
-              24/7 digital journalism from Hyderabad, Telangana.
+              {t("footer.digital247")}
             </p>
             {/* Socials */}
             <div className="flex gap-2">
@@ -51,7 +61,7 @@ const Footer = () => {
           {/* Categories */}
           <div>
             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">
-              Categories
+              {t("footer.categories")}
             </h4>
             <ul className="space-y-1.5">
               {categories.map(item => (
@@ -60,17 +70,17 @@ const Footer = () => {
                     to={item.path}
                     className="text-xs text-slate-600 hover:text-[#1DB954] transition-colors font-medium"
                   >
-                    {item.label}
+                    {t(`nav.${navKey[item.label] || item.label.toLowerCase()}`) || item.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Info */}
+          {/* Company info */}
           <div>
             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">
-              Company
+              {t("footer.company")}
             </h4>
             <ul className="space-y-1.5">
               {footerInfo.map(info => (
@@ -83,7 +93,7 @@ const Footer = () => {
               ))}
               <li>
                 <Link to="/join" className="text-xs text-[#1DB954] hover:text-white transition-colors font-bold flex items-center gap-1.5">
-                  ⚡ Join as Reporter
+                  ⚡ {t("footer.joinReporter")}
                 </Link>
               </li>
             </ul>
@@ -92,24 +102,22 @@ const Footer = () => {
           {/* Newsletter */}
           <div>
             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">
-              Newsletter
+              {t("footer.newsletter")}
             </h4>
             <p className="text-xs text-slate-600 mb-3 leading-relaxed">
-              Get daily briefings in your inbox.
+              {t("footer.digital247")}
             </p>
             <div className="flex gap-1">
               <input
                 type="email"
-                placeholder="Email address"
+                placeholder={t("footer.emailPlaceholder")}
                 className="flex-1 px-3 py-2 text-xs bg-[#181818] border border-slate-800 rounded-lg text-slate-300 outline-none focus:border-[#1DB954] transition-colors"
               />
               <button className="bg-[#1DB954] hover:bg-[#1ed760] text-black px-3 py-2 rounded-lg text-xs font-black transition-colors">
                 →
               </button>
             </div>
-            <p className="text-[10px] text-slate-700 mt-2">
-              No spam. Unsubscribe anytime.
-            </p>
+            <p className="text-[10px] text-slate-700 mt-2">{t("footer.noSpam")}</p>
           </div>
         </div>
       </div>
@@ -117,11 +125,11 @@ const Footer = () => {
       {/* ── BOTTOM BAR ── */}
       <div className="border-t border-slate-900 py-3 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 text-[10px] text-slate-700 font-semibold uppercase tracking-widest">
-          <p>© {year} AP13 News Network · All Rights Reserved</p>
+          <p>© {year} AP13 News Network · {t("footer.allRights")}</p>
           <div className="flex items-center gap-4">
-            <span className="hover:text-[#1DB954] cursor-pointer transition-colors">Privacy</span>
+            <span className="hover:text-[#1DB954] cursor-pointer transition-colors">{t("footer.privacy")}</span>
             <span className="w-0.5 h-3 bg-slate-800 rounded" />
-            <span className="hover:text-[#1DB954] cursor-pointer transition-colors">Terms</span>
+            <span className="hover:text-[#1DB954] cursor-pointer transition-colors">{t("footer.terms")}</span>
             <span className="w-0.5 h-3 bg-slate-800 rounded" />
             <span className="text-slate-800">DevID: AP13_PRO_2026</span>
           </div>
