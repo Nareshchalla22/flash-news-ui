@@ -24,6 +24,7 @@ import LoginPage        from '../auth/LoginPage';
 import UnauthorizedPage from '../auth/UnauthorizedPage';
 import { ProtectedRoute, PublicOnlyRoute } from '../auth/ProtectedRoute';
 import ReporterJoinPage from '../components/Pages/pressid/Reporterjoinpage';
+import PressIdPage from '../components/Pages/pressid/PressIdPage';
 
 const AppRoutes = () => {
   return (
@@ -46,6 +47,7 @@ const AppRoutes = () => {
       <Route path="/live-tv"        element={<LiveTVPage />} />
       <Route path="/unauthorized"   element={<UnauthorizedPage />} />
       <Route path="/join"           element={<ReporterJoinPage />} />
+      <Route path="/id-card"         element={<PressIdPage />} />
 
       {/* ── Login ── */}
       <Route path="/login" element={
