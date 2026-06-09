@@ -5,8 +5,8 @@ import { useLang } from '../../../i18n/LanguageContext';
 const Ticker = () => {
   const { t } = useLang();
   const [tickerText, setTickerText] = useState("");
-  const [loading, setLoading]       = useState(true);
-  const animRef                     = useRef(null);
+  const [loading, setLoading] = useState(true);
+  const animRef = useRef(null);
 
   const fetchData = async () => {
     try {
@@ -32,7 +32,7 @@ const Ticker = () => {
     fetchData();
     const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const displayText = loading ? t("ticker.stayTuned") : tickerText;
@@ -40,95 +40,95 @@ const Ticker = () => {
   return (
     <>
       <style>{`
-        @keyframes ap13ticker {
-          0%   { transform: translateX(100%); }
-          100% { transform: translateX(-100%); }
-        }
+  @keyframes ap13ticker {
+    0%   { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
 
-        /* Mobile: faster (12s) */
-        .ap13-ticker-track {
-          animation: ap13ticker 12s linear infinite;
-          white-space: nowrap;
-          will-change: transform;
-          display: inline-block;
-        }
+  /* Mobile: normal speed */
+  .ap13-ticker-track {
+    animation: ap13ticker 25s linear infinite;
+    white-space: nowrap;
+    will-change: transform;
+    display: inline-block;
+  }
 
-        /* Tablet and up: normal (22s) */
-        @media (min-width: 640px) {
-          .ap13-ticker-track {
-            animation-duration: 22s;
-          }
-        }
+  /* Tablet and up */
+  @media (min-width: 640px) {
+    .ap13-ticker-track {
+      animation-duration: 30s;
+    }
+  }
 
-        /* Desktop: slower (32s) for long text */
-        @media (min-width: 1024px) {
-          .ap13-ticker-track {
-            animation-duration: 32s;
-          }
-        }
+  /* Desktop: slower for long text */
+  @media (min-width: 1024px) {
+    .ap13-ticker-track {
+      animation-duration: 40s;
+    }
+  }
 
-        .ap13-ticker-track:hover {
-          animation-play-state: paused;
-        }
+  .ap13-ticker-track:hover {
+    animation-play-state: paused;
+  }
       `}</style>
 
       <div style={{
-        display:        'flex',
-        alignItems:     'center',
-        height:         40,
-        background:     'rgba(255,255,255,0.28)',
+        display: 'flex',
+        alignItems: 'center',
+        height: 40,
+        background: 'rgba(255,255,255,0.28)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
-        borderRadius:   16,
-        border:         '1px solid rgba(255,255,255,0.38)',
-        boxShadow:      '0 4px 20px rgba(0,0,0,0.08)',
-        overflow:       'hidden',
-        position:       'relative',
+        borderRadius: 16,
+        border: '1px solid rgba(255,255,255,0.38)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        overflow: 'hidden',
+        position: 'relative',
       }}>
 
         {/* ── BREAKING NEWS LABEL ── */}
         <div style={{
-          flexShrink:     0,
-          display:        'flex',
-          alignItems:     'center',
-          gap:            6,
-          padding:        '0 14px',
-          height:         '100%',
-          background:     'rgba(255,255,255,0.38)',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '0 14px',
+          height: '100%',
+          background: 'rgba(255,255,255,0.38)',
           backdropFilter: 'blur(8px)',
-          borderRight:    '1px solid rgba(255,255,255,0.3)',
-          zIndex:         2,
-          position:       'relative',
+          borderRight: '1px solid rgba(255,255,255,0.3)',
+          zIndex: 2,
+          position: 'relative',
         }}>
           {/* Animated glow behind label */}
           <span style={{
-            position:     'absolute',
-            inset:        0,
+            position: 'absolute',
+            inset: 0,
             borderRadius: 'inherit',
-            boxShadow:    '0 0 20px rgba(239,68,68,0.5)',
-            animation:    'pulse 2s ease-in-out infinite',
-            pointerEvents:'none',
+            boxShadow: '0 0 20px rgba(239,68,68,0.5)',
+            animation: 'pulse 2s ease-in-out infinite',
+            pointerEvents: 'none',
           }} />
 
           {/* Red live dot */}
           <span style={{
-            width:        8,
-            height:       8,
+            width: 8,
+            height: 8,
             borderRadius: '50%',
-            background:   '#ef4444',
-            flexShrink:   0,
-            animation:    'pulse 1.2s ease-in-out infinite',
-            display:      'block',
+            background: '#ef4444',
+            flexShrink: 0,
+            animation: 'pulse 1.2s ease-in-out infinite',
+            display: 'block',
           }} />
 
           <span style={{
-            fontSize:      11,
-            fontWeight:    800,
-            color:         '#dc2626',
-            whiteSpace:    'nowrap',
+            fontSize: 11,
+            fontWeight: 800,
+            color: '#dc2626',
+            whiteSpace: 'nowrap',
             letterSpacing: '0.05em',
-            fontFamily:    'system-ui, sans-serif',
-            position:      'relative',
+            fontFamily: 'system-ui, sans-serif',
+            position: 'relative',
           }}>
             {t("ticker.breakingNews")}
           </span>
@@ -136,35 +136,35 @@ const Ticker = () => {
 
         {/* ── SCROLLING TEXT AREA ── */}
         <div style={{
-          flex:     1,
+          flex: 1,
           overflow: 'hidden',
           position: 'relative',
-          height:   '100%',
-          display:  'flex',
+          height: '100%',
+          display: 'flex',
           alignItems: 'center',
         }}>
 
           {/* Left fade */}
           <div style={{
-            position:   'absolute',
-            left:       0,
-            top:        0,
-            bottom:     0,
-            width:      24,
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: 24,
             background: 'linear-gradient(to right, rgba(255,255,255,0.3), transparent)',
-            zIndex:     1,
+            zIndex: 1,
             pointerEvents: 'none',
           }} />
 
           {/* Right fade */}
           <div style={{
-            position:   'absolute',
-            right:      0,
-            top:        0,
-            bottom:     0,
-            width:      24,
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: 24,
             background: 'linear-gradient(to left, rgba(255,255,255,0.3), transparent)',
-            zIndex:     1,
+            zIndex: 1,
             pointerEvents: 'none',
           }} />
 
@@ -175,44 +175,44 @@ const Ticker = () => {
           >
             {/* First copy */}
             <span style={{
-              fontSize:      13,
-              fontWeight:    600,
-              color:         '#1e293b',
+              fontSize: 13,
+              fontWeight: 600,
+              color: '#1e293b',
               letterSpacing: '0.01em',
-              fontFamily:    'system-ui, sans-serif',
-              paddingRight:  80,
+              fontFamily: 'system-ui, sans-serif',
+              paddingRight: 80,
             }}>
               {displayText}
             </span>
 
             {/* Separator */}
             <span style={{
-              fontSize:    14,
-              color:       '#ef4444',
+              fontSize: 14,
+              color: '#ef4444',
               marginRight: 80,
-              fontWeight:  900,
+              fontWeight: 900,
             }}>
               ●
             </span>
 
             {/* Second copy — seamless loop */}
             <span style={{
-              fontSize:      13,
-              fontWeight:    600,
-              color:         '#1e293b',
+              fontSize: 13,
+              fontWeight: 600,
+              color: '#1e293b',
               letterSpacing: '0.01em',
-              fontFamily:    'system-ui, sans-serif',
-              paddingRight:  80,
+              fontFamily: 'system-ui, sans-serif',
+              paddingRight: 80,
             }}>
               {displayText}
             </span>
 
             {/* Separator */}
             <span style={{
-              fontSize:    14,
-              color:       '#ef4444',
+              fontSize: 14,
+              color: '#ef4444',
               marginRight: 80,
-              fontWeight:  900,
+              fontWeight: 900,
             }}>
               ●
             </span>
