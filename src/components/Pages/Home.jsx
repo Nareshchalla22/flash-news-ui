@@ -134,23 +134,42 @@ function ArticleModal({ item, catName, onClose, onShare }) {
 
   return (
     <div className="fixed inset-0 z-[9998] bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
-      <div className="bg-white w-full sm:max-w-xl sm:rounded-2xl overflow-hidden shadow-2xl animate-slideUp flex flex-col max-h-screen sm:max-h-[90vh]" onClick={e=>e.stopPropagation()}>
+      {/* Mobile: full-height sheet with top margin so header doesn't cover it */}
+      {/* Desktop: centred modal */}
+      <div
+        className="bg-white w-full sm:max-w-xl sm:rounded-2xl overflow-hidden shadow-2xl animate-slideUp flex flex-col"
+        style={{ maxHeight:'calc(100vh - 56px)', marginTop:'56px' }}
+        /* 56px ≈ sticky header height. On sm+ override via Tailwind */
+        onClick={e => e.stopPropagation()}
+      >
+        {/* ── Drag handle (mobile) ── */}
+        <div className="flex justify-center pt-2.5 pb-1 sm:hidden flex-shrink-0">
+          <div className="w-10 h-1 rounded-full bg-slate-300"/>
+        </div>
 
-        {/* Topbar */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 flex-shrink-0">
+        {/* ── Topbar ── */}
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 flex-shrink-0">
           <CatBadge category={catName} />
           <div className="flex items-center gap-2">
-            <button onClick={()=>onShare(item)} className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-red-600 hover:text-white text-slate-600 text-[10px] font-black rounded-lg transition-colors">
+            <button
+              onClick={() => onShare(item)}
+              className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-red-600 hover:text-white text-slate-600 text-[10px] font-black rounded-lg transition-colors"
+            >
               <Share2 size={10}/> Share
             </button>
-            <button onClick={onClose} className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
-              <X size={13} className="text-slate-500"/>
+            {/* X — large tap target on mobile */}
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-100 hover:text-red-600 flex items-center justify-center transition-colors"
+              aria-label="Close"
+            >
+              <X size={15} className="text-slate-500"/>
             </button>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="overflow-y-auto flex-1 scrollbar-none">
+        {/* ── Scrollable content ── */}
+        <div className="overflow-y-auto flex-1 scrollbar-none overscroll-contain">
           {f.imageUrl && (
             <div className="w-full aspect-video bg-slate-100">
               <SafeImg src={f.imageUrl} alt={f.title} className="w-full h-full object-cover"/>

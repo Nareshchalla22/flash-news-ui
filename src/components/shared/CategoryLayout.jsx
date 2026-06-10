@@ -215,12 +215,19 @@ function ArticleModal({ item, catName, onClose, onShare }) {
       className="fixed inset-0 z-[9998] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
       onClick={onClose}
     >
+      {/* Mobile: margin-top pushes sheet below sticky header */}
       <div
-        className="bg-white w-full sm:max-w-2xl sm:rounded-2xl overflow-hidden shadow-2xl animate-slideUp flex flex-col max-h-screen sm:max-h-[92vh]"
+        className="bg-white w-full sm:max-w-2xl sm:rounded-2xl overflow-hidden shadow-2xl animate-slideUp flex flex-col sm:max-h-[92vh]"
+        style={{ maxHeight:'calc(100vh - 56px)', marginTop:'56px' }}
         onClick={e => e.stopPropagation()}
       >
+        {/* Drag handle — mobile only */}
+        <div className="flex justify-center pt-2.5 pb-1 sm:hidden flex-shrink-0">
+          <div className="w-10 h-1 rounded-full bg-slate-300"/>
+        </div>
+
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 flex-shrink-0">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 flex-shrink-0">
           <span className="text-[9px] font-black text-red-600 bg-red-50 px-2.5 py-1 rounded-full uppercase tracking-widest">{catName}</span>
           <div className="flex items-center gap-2">
             <button
@@ -229,14 +236,19 @@ function ArticleModal({ item, catName, onClose, onShare }) {
             >
               <Share2 size={11} /> Share
             </button>
-            <button onClick={onClose} className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
-              <X size={14} className="text-slate-500" />
+            {/* Large tap target X */}
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-red-100 hover:text-red-600 flex items-center justify-center transition-colors"
+            >
+              <X size={16} className="text-slate-500" />
             </button>
           </div>
         </div>
 
         {/* Scrollable content */}
-        <div className="overflow-y-auto flex-1">
+        <div className="overflow-y-auto flex-1 scrollbar-none overscroll-contain">
           {/* Hero image */}
           {f.imageUrl && (
             <div className="w-full aspect-video bg-slate-100">
