@@ -14,6 +14,8 @@ import TravelPage        from '../components/Pages/category/TravelPage';
 import TrendingPage      from '../components/Pages/category/TrendingPage';
 import LiveTVPage        from '../components/Pages/category/LiveTVPage';
 import AllNewsFeedPage   from '../components/Pages/feed/AllNewsFeedPage';
+import ArticleDetail from './pages/ArticleDetail/ArticleDetail';
+
 
 import UpdateNews            from '../components/Pages/Form/UpdateNews';
 import TickerManager         from '../components/Pages/Ticker/TickerManager';
@@ -48,6 +50,7 @@ const AppRoutes = () => {
       <Route path="/unauthorized"   element={<UnauthorizedPage />} />
       <Route path="/join"           element={<ReporterJoinPage />} />
       <Route path="/id-card"         element={<PressIdPage />} />
+      <Route path="/category/:cat/:id" element={<ArticleDetail />} />
 
       {/* ── Login ── */}
       <Route path="/login" element={
