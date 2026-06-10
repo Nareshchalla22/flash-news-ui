@@ -14,7 +14,6 @@ import TravelPage        from '../components/Pages/category/TravelPage';
 import TrendingPage      from '../components/Pages/category/TrendingPage';
 import LiveTVPage        from '../components/Pages/category/LiveTVPage';
 import AllNewsFeedPage   from '../components/Pages/feed/AllNewsFeedPage';
-import ArticleDetail from './pages/ArticleDetail/ArticleDetail';
 
 
 import UpdateNews            from '../components/Pages/Form/UpdateNews';
@@ -27,6 +26,8 @@ import UnauthorizedPage from '../auth/UnauthorizedPage';
 import { ProtectedRoute, PublicOnlyRoute } from '../auth/ProtectedRoute';
 import ReporterJoinPage from '../components/Pages/pressid/Reporterjoinpage';
 import PressIdPage from '../components/Pages/pressid/PressIdPage';
+import ArticleDetail from '../components/Pages/ArticleDetail/ArticleDetail';
+
 
 const AppRoutes = () => {
   return (

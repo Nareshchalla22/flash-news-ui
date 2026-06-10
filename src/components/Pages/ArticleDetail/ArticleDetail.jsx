@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { newsService } from '../../services/api';
 import { Share2, ArrowLeft, Calendar, Clock, User, Copy, Check, X } from 'lucide-react';
+import { newsService } from '../../../services/api';
 
 const CAT_META = {
   global:        { color:'#2563eb', label:'WORLD',      tw:'bg-blue-600'   },
