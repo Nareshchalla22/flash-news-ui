@@ -68,7 +68,16 @@ function SafeImage({ src, alt, className, style }) {
 function ShareModal({ item, catName, onClose }) {
   const { title, imageUrl } = extractFields(item);
   const [copied, setCopied] = useState(false);
-  const pageUrl   = window.location.href;
+
+  // Build article-specific deep link
+  const id      = item.id || item._id || '';
+  const cat     = catName || item._cat || item.category || '';
+  const pageUrl = id && cat
+    ? `${window.location.origin}/category/${cat.toLowerCase()}/${id}`
+    : cat
+      ? `${window.location.origin}/category/${cat.toLowerCase()}`
+      : window.location.href;
+
   const shareText = `${title} — AP13 News`;
 
   const handleCopy = () => {
@@ -304,14 +313,35 @@ function ArticleModal({ item, catName, onClose, onShare }) {
             )}
 
             {/* Share footer */}
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Share this story</span>
-              <button
-                onClick={() => onShare(item)}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-[11px] font-black rounded-lg transition-colors"
-              >
-                <Share2 size={12} /> Share Now
-              </button>
+            <div className="mt-6 pt-4 border-t border-slate-100">
+              {/* Article URL preview */}
+              {(() => {
+                const id  = item.id || item._id || '';
+                const cat = catName || '';
+                const articleUrl = id && cat
+                  ? `${window.location.origin}/category/${cat.toLowerCase()}/${id}`
+                  : `${window.location.origin}/category/${cat.toLowerCase()}`;
+                return (
+                  <div className="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200 mb-3">
+                    <span className="text-[9px] text-slate-400 flex-1 truncate font-mono">{articleUrl}</span>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(articleUrl)}
+                      className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-[9px] font-black rounded-lg transition-colors"
+                    >
+                      <Copy size={9} /> Copy
+                    </button>
+                  </div>
+                );
+              })()}
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Share this story</span>
+                <button
+                  onClick={() => onShare(item)}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-[11px] font-black rounded-lg transition-colors"
+                >
+                  <Share2 size={12} /> Share Now
+                </button>
+              </div>
             </div>
           </div>
         </div>

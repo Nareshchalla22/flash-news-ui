@@ -72,7 +72,16 @@ function CatBadge({ category, tiny }) {
 function ShareModal({ item, onClose }) {
   const { title, imageUrl } = extract(item);
   const [copied, setCopied] = useState(false);
-  const url  = window.location.origin;
+
+  // Build article-specific URL: /category/{cat}/{id}
+  const cat  = item._cat || item.category || '';
+  const id   = item.id   || item._id      || '';
+  const url  = id && cat
+    ? `${window.location.origin}/category/${cat.toLowerCase()}/${id}`
+    : cat
+      ? `${window.location.origin}/category/${cat.toLowerCase()}`
+      : window.location.href;
+
   const text = `${title} — AP13 News`;
 
   const options = [
