@@ -4,7 +4,6 @@ import UserMenu from '../auth/UserMenu';
 import LanguageSwitcher from '../i18n/LanguageSwitcher';
 import { useLang } from '../i18n/LanguageContext';
 import { tickerService } from '../services/api';
-import AP13Logo from './AP13Logo';
 
 // ─── TICKER BAR ───────────────────────────────────────────────────────────────
 function TickerBar() {
@@ -55,11 +54,21 @@ function TickerBar() {
           {t('ticker.breakingNews') || 'BREAKING'}
         </span>
       </div>
+
       {/* Arrow */}
-      <div style={{ width: 0, height: 0, borderTop: '17px solid transparent', borderBottom: '17px solid transparent', borderLeft: '9px solid #e8192c', flexShrink: 0 }} />
+      <div style={{
+        width: 0, height: 0,
+        borderTop: '17px solid transparent',
+        borderBottom: '17px solid transparent',
+        borderLeft: '9px solid #e8192c',
+        flexShrink: 0,
+      }} />
+
       {/* Scrolling text */}
       <div style={{ flex: 1, overflow: 'hidden' }}>
-        <span className="ap13-ticker-anim" style={{ fontSize: 13, fontWeight: 700, color: '#111', paddingLeft: 14 }}>
+        <span className="ap13-ticker-anim" style={{
+          fontSize: 13, fontWeight: 700, color: '#111', paddingLeft: 14,
+        }}>
           {text}&nbsp;&nbsp;&nbsp;⚡&nbsp;&nbsp;&nbsp;{text}
         </span>
       </div>
@@ -102,110 +111,213 @@ const Header = () => {
           0%   { transform: translateX(100vw); }
           100% { transform: translateX(-100%); }
         }
+
         .ap13-ticker-anim {
           animation: ap13TickerScroll 38s linear infinite;
-          white-space: nowrap; display: inline-block;
+          white-space: nowrap;
+          display: inline-block;
         }
         .ap13-ticker-anim:hover { animation-play-state: paused; cursor: pointer; }
 
+        /* NAV LINKS */
         .ap13-nav-link {
-          flex-shrink:0; padding:0 12px; height:100%;
-          display:flex; align-items:center;
-          font-size:13px; font-weight:700; color:#e2e8f0;
-          text-decoration:none; white-space:nowrap;
-          border-bottom:3px solid transparent;
-          letter-spacing:0.01em;
-          transition:color 0.15s, border-color 0.15s, background 0.15s;
+          flex-shrink: 0; padding: 0 12px; height: 100%;
+          display: flex; align-items: center;
+          font-size: 13px; font-weight: 700; color: #e2e8f0;
+          text-decoration: none; white-space: nowrap;
+          border-bottom: 3px solid transparent;
+          letter-spacing: 0.01em;
+          transition: color 0.15s, border-color 0.15s, background 0.15s;
         }
-        .ap13-nav-link:hover { color:#fff; background:rgba(255,255,255,0.06); border-bottom-color:#f5c518; }
-        .ap13-nav-link.active { color:#fff; border-bottom-color:#e8192c; background:rgba(232,25,44,0.1); }
-
-        .ap13-mob-menu { display:none; flex-direction:column; background:#0d1320; border-top:2px solid #e8192c; overflow:hidden; max-height:0; transition:max-height 0.3s ease; }
-        .ap13-mob-menu.open { display:flex; max-height:700px; }
-        .ap13-mob-link { padding:12px 20px; font-size:14px; font-weight:700; color:#cbd5e1; text-decoration:none; border-bottom:1px solid #1e293b; transition:background 0.15s,color 0.15s; }
-        .ap13-mob-link:hover, .ap13-mob-link.active { background:rgba(232,25,44,0.12); color:#fff; padding-left:26px; }
-
-        @media (max-width:767px) {
-          .ap13-ticker-anim { animation-duration:26s; }
-          .ap13-desk-only   { display:none !important; }
+        .ap13-nav-link:hover {
+          color: #fff;
+          background: rgba(255,255,255,0.06);
+          border-bottom-color: #f5c518;
         }
-        @media (min-width:768px) {
-          .ap13-mob-only { display:none !important; }
+        .ap13-nav-link.active {
+          color: #fff;
+          border-bottom-color: #e8192c;
+          background: rgba(232,25,44,0.1);
+        }
+
+        /* MOBILE MENU */
+        .ap13-mob-menu {
+          display: none; flex-direction: column;
+          background: #0d1320; border-top: 2px solid #e8192c;
+          overflow: hidden; max-height: 0;
+          transition: max-height 0.3s ease;
+        }
+        .ap13-mob-menu.open { display: flex; max-height: 700px; }
+        .ap13-mob-link {
+          padding: 12px 20px; font-size: 14px; font-weight: 700;
+          color: #cbd5e1; text-decoration: none;
+          border-bottom: 1px solid #1e293b;
+          transition: background 0.15s, color 0.15s;
+        }
+        .ap13-mob-link:hover, .ap13-mob-link.active {
+          background: rgba(232,25,44,0.12); color: #fff; padding-left: 26px;
+        }
+
+        /* RESPONSIVE HELPERS */
+        @media (max-width: 767px) {
+          .ap13-ticker-anim { animation-duration: 26s; }
+          .ap13-desk-only   { display: none !important; }
+        }
+        @media (min-width: 768px) {
+          .ap13-mob-only { display: none !important; }
+        }
+
+        /* LOGO hover effect */
+        .ap13-logo-link:hover img {
+          filter: drop-shadow(0 4px 16px rgba(232,25,44,0.5)) brightness(1.05);
+        }
+        .ap13-logo-link img {
+          transition: filter 0.25s ease;
         }
       `}</style>
 
-      <header style={{ position:'sticky', top:0, zIndex:110, fontFamily:'system-ui,-apple-system,sans-serif' }}>
+      <header style={{
+        position: 'sticky', top: 0, zIndex: 110,
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+      }}>
 
         {/* ══ TOP BAR ══ */}
-        <div style={{ background:'#0a0a0a', borderBottom:'3px solid #e8192c' }}>
+        <div style={{ background: '#0a0a0a', borderBottom: '3px solid #e8192c' }}>
           <div style={{
-            maxWidth:1400, margin:'0 auto',
-            padding:'0 14px', height:82,
-            display:'flex', alignItems:'center',
-            justifyContent:'space-between', gap:10,
+            maxWidth: 1400, margin: '0 auto',
+            padding: '0 14px', height: 80,
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', gap: 10,
           }}>
 
-            {/* LEFT — site identity, desktop only */}
-            <div className="ap13-desk-only" style={{ flexShrink:0, display:'flex', flexDirection:'column', minWidth:130 }}>
-              <span style={{ fontSize:15, fontWeight:900, color:'#f1f5f9' }}>AP13 News</span>
-              <span style={{ fontSize:8, fontWeight:600, color:'#4b5563', letterSpacing:'0.12em', textTransform:'uppercase', marginTop:2 }}>
+            {/* LEFT — site identity (desktop only) */}
+            <div className="ap13-desk-only" style={{
+              flexShrink: 0, display: 'flex',
+              flexDirection: 'column', minWidth: 140,
+            }}>
+              <span style={{ fontSize: 15, fontWeight: 900, color: '#f1f5f9' }}>AP13 News</span>
+              <span style={{
+                fontSize: 8, fontWeight: 600, color: '#4b5563',
+                letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 2,
+              }}>
                 Independent &amp; Trusted Journalism
               </span>
             </div>
 
-            {/* CENTER — SVG Logo (full logo with tagline) */}
-            <Link to="/" style={{ textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-              {/* Desktop: larger logo */}
-              <span className="ap13-desk-only">
-                <AP13Logo height={68} />
-              </span>
-              {/* Mobile: slightly smaller logo */}
-              <span className="ap13-mob-only">
-                <AP13Logo height={56} />
-              </span>
+            {/* CENTER — Logo image */}
+            {/*
+              IMPORTANT: Save your logo file as:
+                /public/ap13-logo.png   (in your React project root)
+              That's it — Vite serves /public files at root URL automatically.
+            */}
+            <Link
+              to="/"
+              className="ap13-logo-link"
+              style={{
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              {/* Desktop logo — larger */}
+              <img
+                src="/ap13-logo.png"
+                alt="AP13 NEWS — Telugu News Channel 24/7"
+                className="ap13-desk-only"
+                style={{
+                  height: 66,
+                  width: 'auto',
+                  objectFit: 'contain',
+                  display: 'block',
+                  filter: 'drop-shadow(0 2px 12px rgba(232,25,44,0.3))',
+                }}
+              />
+              {/* Mobile logo — smaller */}
+              <img
+                src="/ap13-logo.png"
+                alt="AP13 NEWS"
+                className="ap13-mob-only"
+                style={{
+                  height: 52,
+                  width: 'auto',
+                  objectFit: 'contain',
+                  display: 'block',
+                  filter: 'drop-shadow(0 2px 8px rgba(232,25,44,0.25))',
+                }}
+              />
             </Link>
 
             {/* RIGHT — controls */}
-            <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
 
-              {/* 4K HD — desktop only */}
-              <div className="ap13-desk-only" style={{ display:'flex', flexDirection:'column', alignItems:'center', background:'#111', border:'1px solid #222', padding:'5px 9px', borderRadius:4, gap:3 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:4 }}>
-                  <span style={{ fontSize:9, fontWeight:900, color:'#3b82f6', letterSpacing:'0.1em' }}>4K</span>
-                  <span style={{ fontSize:8, fontWeight:700, color:'#6b7280' }}>HD</span>
+              {/* 4K HD badge — desktop only */}
+              <div className="ap13-desk-only" style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                background: '#111', border: '1px solid #222',
+                padding: '5px 9px', borderRadius: 4, gap: 3,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 9, fontWeight: 900, color: '#3b82f6', letterSpacing: '0.1em' }}>4K</span>
+                  <span style={{ fontSize: 8, fontWeight: 700, color: '#6b7280' }}>HD</span>
                 </div>
-                <div style={{ display:'flex', gap:2 }}>
-                  {[0,1,2,3].map(i=>(
-                    <div key={i} style={{ height:3, width:9, background:'#3b82f6', borderRadius:2, opacity:i===3?0.4:1, animation:i===3?'ap13HdPulse 1s ease-in-out infinite':'none' }} />
+                <div style={{ display: 'flex', gap: 2 }}>
+                  {[0,1,2,3].map(i => (
+                    <div key={i} style={{
+                      height: 3, width: 9, background: '#3b82f6', borderRadius: 2,
+                      opacity: i === 3 ? 0.4 : 1,
+                      animation: i === 3 ? 'ap13HdPulse 1s ease-in-out infinite' : 'none',
+                    }} />
                   ))}
                 </div>
               </div>
 
-              {/* AP13LIVE — desktop only */}
-              <div className="ap13-desk-only" style={{ display:'flex', flexDirection:'column', alignItems:'center', background:'#111', border:'1px solid #222', padding:'5px 9px', borderRadius:4, gap:1 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:4 }}>
-                  <span style={{ fontSize:10, fontWeight:900, color:'#e8192c' }}>▶</span>
-                  <span style={{ fontSize:10, fontWeight:900, color:'#f1f1f1', letterSpacing:'0.04em', textTransform:'uppercase' }}>AP13LIVE</span>
+              {/* AP13LIVE YouTube — desktop only */}
+              <div className="ap13-desk-only" style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                background: '#111', border: '1px solid #222',
+                padding: '5px 9px', borderRadius: 4, gap: 1,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 10, fontWeight: 900, color: '#e8192c' }}>▶</span>
+                  <span style={{ fontSize: 10, fontWeight: 900, color: '#f1f1f1', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                    AP13LIVE
+                  </span>
                 </div>
-                <span style={{ fontSize:7, fontWeight:700, color:'#6b7280', letterSpacing:'0.1em', textTransform:'uppercase' }}>YouTube</span>
+                <span style={{ fontSize: 7, fontWeight: 700, color: '#6b7280', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  YouTube
+                </span>
               </div>
 
-              {/* Language Switcher — both mobile & desktop */}
+              {/* Language Switcher — BOTH mobile & desktop */}
               <LanguageSwitcher />
 
               {/* LIVE TV — desktop only */}
-              <Link to="/live-tv" className="ap13-desk-only" style={{
-                display:'flex', alignItems:'center', gap:6,
-                background:'#e8192c', padding:'7px 13px',
-                borderRadius:4, textDecoration:'none',
-                boxShadow:'0 0 16px rgba(232,25,44,0.35)',
-                flexShrink:0, transition:'opacity 0.2s',
-              }}
-                onMouseEnter={e=>e.currentTarget.style.opacity='0.85'}
-                onMouseLeave={e=>e.currentTarget.style.opacity='1'}
+              <Link
+                to="/live-tv"
+                className="ap13-desk-only"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  background: '#e8192c', padding: '7px 13px',
+                  borderRadius: 4, textDecoration: 'none',
+                  boxShadow: '0 0 16px rgba(232,25,44,0.35)',
+                  flexShrink: 0, transition: 'opacity 0.2s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
               >
-                <span style={{ width:7, height:7, borderRadius:'50%', background:'#fff', display:'block', animation:'ap13LivePing 1s ease-in-out infinite', flexShrink:0 }} />
-                <span style={{ fontSize:13, fontWeight:900, fontStyle:'italic', color:'#fff', letterSpacing:'0.02em', textTransform:'uppercase' }}>LIVE TV</span>
+                <span style={{
+                  width: 7, height: 7, borderRadius: '50%',
+                  background: '#fff', display: 'block',
+                  animation: 'ap13LivePing 1s ease-in-out infinite', flexShrink: 0,
+                }} />
+                <span style={{
+                  fontSize: 13, fontWeight: 900, fontStyle: 'italic',
+                  color: '#fff', letterSpacing: '0.02em', textTransform: 'uppercase',
+                }}>
+                  LIVE TV
+                </span>
               </Link>
 
               {/* User Menu — desktop only */}
@@ -218,10 +330,10 @@ const Header = () => {
                 className="ap13-mob-only"
                 onClick={() => setMenuOpen(o => !o)}
                 style={{
-                  background:'#1a1a1a', border:'1px solid #333',
-                  borderRadius:6, padding:'7px 11px',
-                  cursor:'pointer', color:'#e2e8f0',
-                  fontSize:18, lineHeight:1,
+                  background: '#1a1a1a', border: '1px solid #333',
+                  borderRadius: 6, padding: '7px 11px',
+                  cursor: 'pointer', color: '#e2e8f0',
+                  fontSize: 18, lineHeight: 1,
                 }}
                 aria-label="Open menu"
               >
@@ -234,40 +346,80 @@ const Header = () => {
         {/* ══ YELLOW TICKER ══ */}
         <TickerBar />
 
-        {/* ══ BLUE NAV — desktop only ══ */}
-        <nav className="ap13-desk-only" style={{ background:'#1a2744', borderBottom:'1px solid #243350' }}>
-          <div style={{ maxWidth:1400, margin:'0 auto', padding:'0 16px', height:42, display:'flex', alignItems:'center', overflowX:'auto' }}>
+        {/* ══ BLUE NAV BAR — desktop only ══ */}
+        <nav
+          className="ap13-desk-only"
+          style={{ background: '#1a2744', borderBottom: '1px solid #243350' }}
+        >
+          <div style={{
+            maxWidth: 1400, margin: '0 auto',
+            padding: '0 16px', height: 42,
+            display: 'flex', alignItems: 'center', overflowX: 'auto',
+          }}>
             {navLinks.map((item, i) => (
-              <Link key={i} to={item.path} className={`ap13-nav-link${location.pathname===item.path?' active':''}`}>
+              <Link
+                key={i}
+                to={item.path}
+                className={`ap13-nav-link${location.pathname === item.path ? ' active' : ''}`}
+              >
                 {item.label}
               </Link>
             ))}
-            <Link to="/id-card" className="ap13-nav-link" style={{ marginLeft:'auto', color:'#f5c518' }}>
+            <Link
+              to="/id-card"
+              className="ap13-nav-link"
+              style={{ marginLeft: 'auto', color: '#f5c518' }}
+            >
               🪪 PRESS ID
             </Link>
           </div>
         </nav>
 
         {/* ══ MOBILE DROPDOWN ══ */}
-        <div className={`ap13-mob-menu${menuOpen?' open':''}`}>
-          <div style={{ padding:'12px 20px', borderBottom:'1px solid #1e293b', display:'flex', alignItems:'center', gap:10 }}>
+        <div className={`ap13-mob-menu${menuOpen ? ' open' : ''}`}>
+          {/* User + Live TV row */}
+          <div style={{
+            padding: '12px 20px', borderBottom: '1px solid #1e293b',
+            display: 'flex', alignItems: 'center', gap: 10,
+          }}>
             <UserMenu />
-            <Link to="/live-tv" style={{
-              display:'flex', alignItems:'center', gap:5,
-              background:'#e8192c', padding:'6px 12px', borderRadius:4,
-              textDecoration:'none', fontSize:12, fontWeight:900,
-              color:'#fff', textTransform:'uppercase', letterSpacing:'0.06em',
-            }} onClick={()=>setMenuOpen(false)}>
-              <span style={{ width:6, height:6, borderRadius:'50%', background:'#fff', display:'block', animation:'ap13LivePing 1s infinite' }} />
+            <Link
+              to="/live-tv"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                background: '#e8192c', padding: '6px 12px',
+                borderRadius: 4, textDecoration: 'none',
+                fontSize: 12, fontWeight: 900, color: '#fff',
+                textTransform: 'uppercase', letterSpacing: '0.06em',
+              }}
+              onClick={() => setMenuOpen(false)}
+            >
+              <span style={{
+                width: 6, height: 6, borderRadius: '50%',
+                background: '#fff', display: 'block',
+                animation: 'ap13LivePing 1s infinite',
+              }} />
               LIVE TV
             </Link>
           </div>
+
           {navLinks.map((item, i) => (
-            <Link key={i} to={item.path} className={`ap13-mob-link${location.pathname===item.path?' active':''}`} onClick={()=>setMenuOpen(false)}>
+            <Link
+              key={i}
+              to={item.path}
+              className={`ap13-mob-link${location.pathname === item.path ? ' active' : ''}`}
+              onClick={() => setMenuOpen(false)}
+            >
               {item.label}
             </Link>
           ))}
-          <Link to="/id-card" className="ap13-mob-link" style={{ color:'#f5c518' }} onClick={()=>setMenuOpen(false)}>
+
+          <Link
+            to="/id-card"
+            className="ap13-mob-link"
+            style={{ color: '#f5c518' }}
+            onClick={() => setMenuOpen(false)}
+          >
             🪪 Press ID Card
           </Link>
         </div>

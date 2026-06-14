@@ -5,18 +5,295 @@ import { navItems } from '../../Navbar/navdata';
 import { useLang } from '../../i18n/LanguageContext';
 import { Share2, X, Copy, Check, Clock, Calendar, User, ArrowRight } from 'lucide-react';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// AD CONFIGURATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Google AdSense — replace with your real publisher ID when you get it
+const ADSENSE_CLIENT = 'ca-pub-XXXXXXXXXXXXXXXXX';
+const ADSENSE_READY  = ADSENSE_CLIENT !== 'ca-pub-XXXXXXXXXXXXXXXXX';
+
+// ── Client Ads — Schools, Colleges & Shopping Complex ─────────────────────
+// Update name/subtitle/url/image/phone for each real client before going live
+const CLIENT_ADS = [
+
+  // ── SCHOOLS ──────────────────────────────────────────────────────────────
+  {
+    id:       1,
+    type:     'school',
+    image:    '',                                        // ← paste school logo URL
+    title:    'Sri Vidya English Medium School',         // ← school name
+    subtitle: '🎓 Admissions Open 2025–26 · Nursery to 10th · Call: 9876543210',
+    url:      'https://yourschool.com',                  // ← school website
+    bg:       '#0a1628',
+    accent:   '#3b82f6',                                 // blue — education
+    tag:      'Admissions Open',
+    phone:    '9876543210',
+    badge:    '🏫 School',
+  },
+  {
+    id:       2,
+    type:     'school',
+    image:    '',
+    title:    'Chaitanya High School',
+    subtitle: '📚 CBSE & State Board · Sports · Smart Classes · Hostel Available',
+    url:      'https://chaitanyaschool.com',
+    bg:       '#0a1a2e',
+    accent:   '#0ea5e9',
+    tag:      'Admissions Open',
+    phone:    '9000000001',
+    badge:    '🏫 School',
+  },
+
+  // ── COLLEGES ─────────────────────────────────────────────────────────────
+  {
+    id:       3,
+    type:     'college',
+    image:    '',                                        // ← college logo URL
+    title:    'Sri Sai Degree College',                  // ← college name
+    subtitle: '🎓 B.Com · BBA · BSc · BA · Lateral Entry Open · Hyderabad',
+    url:      'https://srisaicollege.com',
+    bg:       '#0f0a28',
+    accent:   '#8b5cf6',                                 // purple — higher education
+    tag:      'Admissions 2025',
+    phone:    '9000000002',
+    badge:    '🎓 College',
+  },
+  {
+    id:       4,
+    type:     'college',
+    image:    '',
+    title:    'Nalanda Junior College',
+    subtitle: '📖 MPC · BiPC · MEC · CEC · Intermediate · JEE & NEET Coaching',
+    url:      'https://nalandajrcollege.com',
+    bg:       '#1a0a28',
+    accent:   '#a855f7',
+    tag:      'Admissions Open',
+    phone:    '9000000003',
+    badge:    '🎓 Junior College',
+  },
+  {
+    id:       5,
+    type:     'college',
+    image:    '',
+    title:    'Viswam Engineering College',
+    subtitle: '🏗️ B.Tech · MBA · MCA · Approved by AICTE · Scholarships Available',
+    url:      'https://viswamcollege.com',
+    bg:       '#0a1f0a',
+    accent:   '#22c55e',
+    tag:      'Admissions Open',
+    phone:    '9000000004',
+    badge:    '🏛️ Engineering',
+  },
+
+  // ── SHOPPING COMPLEX ─────────────────────────────────────────────────────
+  {
+    id:       6,
+    type:     'shopping',
+    image:    '',                                        // ← shopping complex image
+    title:    'Grand Mall Hyderabad — Now Open!',        // ← mall name
+    subtitle: '🛍️ 200+ Stores · Food Court · Multiplex · Parking · Open Daily 10AM–10PM',
+    url:      'https://grandmallhyd.com',
+    bg:       '#1f0a0a',
+    accent:   '#ef4444',                                 // red — grand opening
+    tag:      '🎉 Grand Opening',
+    phone:    '9000000005',
+    badge:    '🛍️ Shopping Mall',
+  },
+  {
+    id:       7,
+    type:     'shopping',
+    image:    '',
+    title:    'City Square Shopping Complex',
+    subtitle: '🎊 New Launch! Fashion · Electronics · Grocery · Kids Zone · Free Entry',
+    url:      'https://citysquare.com',
+    bg:       '#1a0f00',
+    accent:   '#f59e0b',                                 // amber — new launch
+    tag:      '🆕 Now Open',
+    phone:    '9000000006',
+    badge:    '🏪 Shopping Complex',
+  },
+  {
+    id:       8,
+    type:     'shopping',
+    image:    '',
+    title:    'Sri Lakshmi Hypermarket',
+    subtitle: '🛒 Fresh Groceries · Daily Deals · Home Delivery Available · AP & TS',
+    url:      'https://srilakshmihyper.com',
+    bg:       '#001a0f',
+    accent:   '#10b981',
+    tag:      'Grand Opening',
+    phone:    '9000000007',
+    badge:    '🛒 Hypermarket',
+  },
+];
+
+// ─── ADSENSE SLOT COMPONENT ───────────────────────────────────────────────────
+function AdSenseSlot({ slot, format = 'auto', style = {} }) {
+  useEffect(() => {
+    if (!ADSENSE_READY) return;
+    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch {}
+  }, []);
+
+  if (!ADSENSE_READY) return null;
+
+  return (
+    <div style={{ overflow: 'hidden', textAlign: 'center', ...style }}>
+      <ins
+        className="adsbygoogle"
+        style={{ display: 'block' }}
+        data-ad-client={ADSENSE_CLIENT}
+        data-ad-slot={slot}
+        data-ad-format={format}
+        data-full-width-responsive="true"
+      />
+    </div>
+  );
+}
+
+// ─── CLIENT BANNER AD ────────────────────────────────────────────────────────
+function ClientBanner({ ad }) {
+  if (!ad) return null;
+
+  const typeIcon =
+    ad.type === 'school'   ? '🏫' :
+    ad.type === 'college'  ? '🎓' :
+    ad.type === 'shopping' ? '🛍️' : '📢';
+
+  const ctaLabel =
+    ad.type === 'school'   ? 'Enquire →'  :
+    ad.type === 'college'  ? 'Apply Now →' :
+    ad.type === 'shopping' ? 'Visit Now →' : 'Learn More →';
+
+  return (
+    <a
+      href={ad.url}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      className="block no-underline rounded-xl overflow-hidden hover:shadow-xl transition-all hover:-translate-y-0.5"
+      style={{ background: ad.bg, border: `1.5px solid ${ad.accent}40` }}
+    >
+      {/* Top accent line */}
+      <div style={{ height: 3, background: `linear-gradient(90deg, ${ad.accent}, ${ad.accent}44)` }} />
+
+      <div className="flex items-center gap-3 px-4 py-3 relative">
+
+        {/* Ad tag — top right */}
+        <div className="absolute top-2 right-3 flex items-center gap-1.5">
+          <span className="text-[7px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded"
+            style={{ background: `${ad.accent}25`, color: ad.accent }}>
+            {ad.tag}
+          </span>
+        </div>
+
+        {/* Logo / icon */}
+        <div className="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden flex items-center justify-center border-2"
+          style={{ background: `${ad.accent}18`, borderColor: `${ad.accent}40` }}>
+          {ad.image
+            ? <img src={ad.image} alt={ad.title} className="w-full h-full object-cover"
+                onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
+            : null
+          }
+          <div className="w-full h-full flex items-center justify-center text-2xl" style={{ display: ad.image ? 'none' : 'flex' }}>
+            {typeIcon}
+          </div>
+        </div>
+
+        {/* Text content */}
+        <div className="flex-1 min-w-0 pr-2">
+          {/* Badge */}
+          <span className="inline-block text-[8px] font-black px-2 py-0.5 rounded-full mb-1"
+            style={{ background: `${ad.accent}20`, color: ad.accent }}>
+            {ad.badge || typeIcon}
+          </span>
+
+          {/* Title */}
+          <p className="text-[13px] font-black text-white leading-tight mb-0.5 line-clamp-1">
+            {ad.title}
+          </p>
+
+          {/* Subtitle */}
+          <p className="text-[10px] leading-snug line-clamp-2" style={{ color: '#94a3b8' }}>
+            {ad.subtitle}
+          </p>
+
+          {/* Phone number */}
+          {ad.phone && (
+            <p className="text-[9px] font-black mt-1" style={{ color: ad.accent }}>
+              📞 {ad.phone}
+            </p>
+          )}
+        </div>
+
+        {/* CTA button */}
+        <div className="flex-shrink-0 text-[9px] font-black text-black px-3 py-2 rounded-lg uppercase tracking-wide whitespace-nowrap text-center leading-tight"
+          style={{ background: ad.accent, minWidth: 56 }}>
+          {ctaLabel}
+        </div>
+      </div>
+    </a>
+  );
+}
+
+// ─── ROTATING CLIENT AD ───────────────────────────────────────────────────────
+function RotatingClientAd() {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    if (CLIENT_ADS.length <= 1) return;
+    const id = setInterval(() => setIdx(i => (i + 1) % CLIENT_ADS.length), 7000);
+    return () => clearInterval(id);
+  }, []);
+  return <ClientBanner ad={CLIENT_ADS[idx]} />;
+}
+
+// ─── COMBINED AD BLOCK ────────────────────────────────────────────────────────
+// Shows AdSense if ID is configured, else shows rotating client ad
+function AdBlock({ slot, className = '' }) {
+  return (
+    <div className={`my-4 ${className}`}>
+      {ADSENSE_READY
+        ? <AdSenseSlot slot={slot} />
+        : <RotatingClientAd />
+      }
+    </div>
+  );
+}
+
+// ─── ADVERTISE CTA ────────────────────────────────────────────────────────────
+function AdvertiseCTA() {
+  return (
+    <a href="mailto:ads@ap13news.in" className="block no-underline mb-4">
+      <div className="rounded-xl p-4 flex items-center justify-between gap-3 border border-blue-900/30 hover:shadow-md transition-shadow"
+        style={{ background: 'linear-gradient(135deg,#0a1628,#0f1f3d)' }}>
+        <div>
+          <p className="text-[8px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">📢 Advertise with us</p>
+          <p className="text-[13px] font-black text-white mb-0.5">Reach 1M+ Telugu Readers</p>
+          <p className="text-[10px] text-slate-400">Contact: ads@ap13news.in</p>
+        </div>
+        <div className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-wide whitespace-nowrap transition-colors">
+          Book Ad →
+        </div>
+      </div>
+    </a>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EXISTING COMPONENTS (unchanged)
+// ─────────────────────────────────────────────────────────────────────────────
+
 const ACTIVE_CATS = ['Global','National','Business','Sports','Entertainment','Health','Politics','Crime','State'];
 
 const CAT_META = {
-  Global:        { color:'#2563eb', tw:'bg-blue-600',   label:'WORLD',        key:'nav.global'        },
-  National:      { color:'#16a34a', tw:'bg-green-600',  label:'INDIA',        key:'nav.national'      },
-  Business:      { color:'#7c3aed', tw:'bg-violet-600', label:'BUSINESS',     key:'nav.business'      },
-  Sports:        { color:'#ea580c', tw:'bg-orange-600', label:'SPORTS',       key:'nav.sports'        },
-  Entertainment: { color:'#db2777', tw:'bg-pink-600',   label:'ENTERTAIN',    key:'nav.entertainment' },
-  Health:        { color:'#0d9488', tw:'bg-teal-600',   label:'HEALTH',       key:'nav.health'        },
-  Politics:      { color:'#4f46e5', tw:'bg-indigo-600', label:'POLITICAL',    key:'nav.politics'      },
-  Crime:         { color:'#dc2626', tw:'bg-red-600',    label:'CRIME',        key:'nav.crime'         },
-  State:         { color:'#d97706', tw:'bg-amber-600',  label:'STATE',        key:'nav.state'         },
+  Global:        { color:'#2563eb', tw:'bg-blue-600',   label:'WORLD',     key:'nav.global'        },
+  National:      { color:'#16a34a', tw:'bg-green-600',  label:'INDIA',     key:'nav.national'      },
+  Business:      { color:'#7c3aed', tw:'bg-violet-600', label:'BUSINESS',  key:'nav.business'      },
+  Sports:        { color:'#ea580c', tw:'bg-orange-600', label:'SPORTS',    key:'nav.sports'        },
+  Entertainment: { color:'#db2777', tw:'bg-pink-600',   label:'ENTERTAIN', key:'nav.entertainment' },
+  Health:        { color:'#0d9488', tw:'bg-teal-600',   label:'HEALTH',    key:'nav.health'        },
+  Politics:      { color:'#4f46e5', tw:'bg-indigo-600', label:'POLITICAL', key:'nav.politics'      },
+  Crime:         { color:'#dc2626', tw:'bg-red-600',    label:'CRIME',     key:'nav.crime'         },
+  State:         { color:'#d97706', tw:'bg-amber-600',  label:'STATE',     key:'nav.state'         },
 };
 
 function extract(item) {
@@ -46,7 +323,6 @@ function fmtDate(d) {
   } catch { return ''; }
 }
 
-// ── Safe Image ──────────────────────────────────────────────────────────────
 function SafeImg({ src, alt, className, style }) {
   const [err, setErr] = useState(false);
   if (!src || err) return (
@@ -57,7 +333,6 @@ function SafeImg({ src, alt, className, style }) {
   return <img src={src} alt={alt||''} className={className} style={style} onError={() => setErr(true)} />;
 }
 
-// ── Category Badge ──────────────────────────────────────────────────────────
 function CatBadge({ category, tiny }) {
   const meta = CAT_META[category] || { tw:'bg-red-600', label: category||'' };
   return (
@@ -68,12 +343,9 @@ function CatBadge({ category, tiny }) {
   );
 }
 
-// ── Share Modal ─────────────────────────────────────────────────────────────
 function ShareModal({ item, onClose }) {
   const { title, imageUrl } = extract(item);
   const [copied, setCopied] = useState(false);
-
-  // Build article-specific URL: /category/{cat}/{id}
   const cat  = item._cat || item.category || '';
   const id   = item.id   || item._id      || '';
   const url  = id && cat
@@ -81,29 +353,20 @@ function ShareModal({ item, onClose }) {
     : cat
       ? `${window.location.origin}/category/${cat.toLowerCase()}`
       : window.location.href;
-
   const text = `${title} — AP13 News`;
-
   const options = [
     { label:'WhatsApp', icon:'💬', color:'#25D366', bg:'#dcfce7', href:`https://wa.me/?text=${encodeURIComponent(text+'\n'+url)}`           },
     { label:'Twitter',  icon:'🐦', color:'#000',    bg:'#f1f5f9', href:`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}` },
     { label:'Facebook', icon:'📘', color:'#1877f2', bg:'#dbeafe', href:`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`  },
     { label:'Telegram', icon:'✈️', color:'#0088cc', bg:'#e0f2fe', href:`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`           },
   ];
-
   return (
     <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white w-full sm:max-w-sm rounded-2xl overflow-hidden shadow-2xl animate-slideUp" onClick={e=>e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
-          <div className="flex items-center gap-2">
-            <Share2 size={16} className="text-red-500"/>
-            <span className="font-black text-[14px] text-slate-900">Share Story</span>
-          </div>
-          <button onClick={onClose} className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors">
-            <X size={13} className="text-slate-500"/>
-          </button>
+          <div className="flex items-center gap-2"><Share2 size={16} className="text-red-500"/><span className="font-black text-[14px] text-slate-900">Share Story</span></div>
+          <button onClick={onClose} className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"><X size={13} className="text-slate-500"/></button>
         </div>
-        {/* Preview */}
         <div className="flex gap-3 px-5 py-3 bg-slate-50 border-b border-slate-100">
           {imageUrl && <img src={imageUrl} alt="" className="w-12 h-10 object-cover rounded-lg flex-shrink-0" onError={e=>e.target.style.display='none'}/>}
           <p className="text-[11px] font-bold text-slate-700 line-clamp-2 leading-snug">{title}</p>
@@ -113,8 +376,7 @@ function ShareModal({ item, onClose }) {
             {options.map(o => (
               <a key={o.label} href={o.href} target="_blank" rel="noreferrer"
                 className="flex flex-col items-center gap-1.5 p-2 rounded-xl no-underline hover:scale-105 transition-transform"
-                style={{ background:o.bg }}
-              >
+                style={{ background:o.bg }}>
                 <span className="text-lg">{o.icon}</span>
                 <span className="text-[8px] font-black" style={{ color:o.color }}>{o.label}</span>
               </a>
@@ -133,51 +395,31 @@ function ShareModal({ item, onClose }) {
   );
 }
 
-// ── Article Full-Read Modal ─────────────────────────────────────────────────
 function ArticleModal({ item, catName, onClose, onShare }) {
   const f = extract(item);
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
   }, []);
-
   return (
     <div className="fixed inset-0 z-[9998] bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
-      {/* Mobile: full-height sheet with top margin so header doesn't cover it */}
-      {/* Desktop: centred modal */}
-      <div
-        className="bg-white w-full sm:max-w-xl sm:rounded-2xl overflow-hidden shadow-2xl animate-slideUp flex flex-col"
+      <div className="bg-white w-full sm:max-w-xl sm:rounded-2xl overflow-hidden shadow-2xl animate-slideUp flex flex-col"
         style={{ maxHeight:'calc(100vh - 56px)', marginTop:'56px' }}
-        /* 56px ≈ sticky header height. On sm+ override via Tailwind */
-        onClick={e => e.stopPropagation()}
-      >
-        {/* ── Drag handle (mobile) ── */}
+        onClick={e => e.stopPropagation()}>
         <div className="flex justify-center pt-2.5 pb-1 sm:hidden flex-shrink-0">
           <div className="w-10 h-1 rounded-full bg-slate-300"/>
         </div>
-
-        {/* ── Topbar ── */}
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 flex-shrink-0">
           <CatBadge category={catName} />
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => onShare(item)}
-              className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-red-600 hover:text-white text-slate-600 text-[10px] font-black rounded-lg transition-colors"
-            >
+            <button onClick={() => onShare(item)} className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-red-600 hover:text-white text-slate-600 text-[10px] font-black rounded-lg transition-colors">
               <Share2 size={10}/> Share
             </button>
-            {/* X — large tap target on mobile */}
-            <button
-              onClick={onClose}
-              className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-100 hover:text-red-600 flex items-center justify-center transition-colors"
-              aria-label="Close"
-            >
+            <button onClick={onClose} className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-100 hover:text-red-600 flex items-center justify-center transition-colors" aria-label="Close">
               <X size={15} className="text-slate-500"/>
             </button>
           </div>
         </div>
-
-        {/* ── Scrollable content ── */}
         <div className="overflow-y-auto flex-1 scrollbar-none overscroll-contain">
           {f.imageUrl && (
             <div className="w-full aspect-video bg-slate-100">
@@ -186,7 +428,6 @@ function ArticleModal({ item, catName, onClose, onShare }) {
           )}
           <div className="px-5 py-5">
             <h1 className="text-xl font-black text-slate-900 leading-tight mb-3 uppercase italic tracking-tight">{f.title}</h1>
-            {/* Meta */}
             <div className="flex items-center flex-wrap gap-3 mb-4 pb-4 border-b border-slate-100">
               {f.reporterName && (
                 <div className="flex items-center gap-1.5">
@@ -197,7 +438,10 @@ function ArticleModal({ item, catName, onClose, onShare }) {
               {f.date && <span className="flex items-center gap-1 text-[10px] text-slate-400"><Calendar size={10}/>{new Date(f.date).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</span>}
               {f.createdAt && <span className="text-[9px] font-black text-red-600 bg-red-50 px-2 py-0.5 rounded-full">{fmtDate(f.createdAt)}</span>}
             </div>
-            {/* Description paragraphs */}
+
+            {/* ── In-article ad ── */}
+            <AdBlock slot="5555555555" className="mb-4" />
+
             {f.description ? (
               f.description.split('\n').filter(Boolean).map((p,i) => (
                 <p key={i} className="text-slate-700 text-[14px] leading-relaxed mb-3">{p}</p>
@@ -205,7 +449,6 @@ function ArticleModal({ item, catName, onClose, onShare }) {
             ) : (
               <p className="text-slate-400 italic text-sm text-center py-8">No further details available.</p>
             )}
-            {/* Footer */}
             <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
               <span className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Share this story</span>
               <button onClick={()=>onShare(item)} className="flex items-center gap-1.5 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-[11px] font-black rounded-lg transition-colors">
@@ -219,12 +462,10 @@ function ArticleModal({ item, catName, onClose, onShare }) {
   );
 }
 
-// ── Skeleton ────────────────────────────────────────────────────────────────
 function Sk({ className = 'h-32 rounded-xl' }) {
   return <div className={`${className} bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%] animate-shimmer`}/>;
 }
 
-// ── Avatar Strip ────────────────────────────────────────────────────────────
 function AvatarStrip({ allNews, onRead }) {
   const items = Object.values(allNews).flat().slice(0,14);
   if (!items.length) return null;
@@ -243,82 +484,50 @@ function AvatarStrip({ allNews, onRead }) {
   );
 }
 
-// ── Hero Slider ─────────────────────────────────────────────────────────────
-// Accepts either { items, category } (single-cat) OR { mixedItems } (shuffle mode)
 function HeroSlider({ items, category, mixedItems, onRead }) {
-  // Build the actual slide list
   const slides = mixedItems
     ? mixedItems
     : (items || []).map(i => ({ ...i, _cat: i._cat || category }));
-
   const [idx, setIdx] = useState(0);
   const timer = useRef(null);
-
   useEffect(() => {
     if (!slides.length) return;
     setIdx(0);
     timer.current = setInterval(() => setIdx(p => (p + 1) % slides.length), 4500);
     return () => clearInterval(timer.current);
   }, [slides.length]);
-
   if (!slides.length) return null;
-
-  const slide     = slides[idx];
-  const slideCat  = slide._cat || category || '';
+  const slide    = slides[idx];
+  const slideCat = slide._cat || category || '';
   const { title, imageUrl } = extract(slide);
-
   return (
-    <div
-      className="relative w-full rounded-xl overflow-hidden bg-slate-200 shadow-md cursor-pointer group"
-      style={{ aspectRatio:'16/10' }}
-      onClick={() => onRead(slide, slideCat)}
-    >
-      {/* Image — fades between slides */}
-      <SafeImg
-        key={idx}
-        src={imageUrl} alt={title}
+    <div className="relative w-full rounded-xl overflow-hidden bg-slate-200 shadow-md cursor-pointer group" style={{ aspectRatio:'16/10' }}
+      onClick={() => onRead(slide, slideCat)}>
+      <SafeImg key={idx} src={imageUrl} alt={title}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        style={{ animation:'heroFade 0.5s ease' }}
-      />
+        style={{ animation:'heroFade 0.5s ease' }}/>
       <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/25 to-transparent"/>
-
-      {/* Hover overlay */}
       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-        <span className="bg-white/90 text-slate-900 text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-wide shadow-lg">
-          Read Full Story
-        </span>
+        <span className="bg-white/90 text-slate-900 text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-wide shadow-lg">Read Full Story</span>
       </div>
-
-      {/* Prev / Next arrows */}
       {slides.length > 1 && [
         { sym:'‹', dir:-1, pos:'left-2' },
         { sym:'›', dir:1,  pos:'right-2' },
       ].map(({ sym, dir, pos }) => (
-        <button
-          key={sym}
+        <button key={sym}
           onClick={e => { e.stopPropagation(); setIdx(p => (p + dir + slides.length) % slides.length); }}
           className={`absolute top-1/2 -translate-y-1/2 ${pos} w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 text-white text-xl font-black flex items-center justify-center transition-colors z-10`}
         >{sym}</button>
       ))}
-
-      {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 p-3 pointer-events-none">
-        {/* Category badge — changes per slide */}
         {slideCat && <CatBadge category={slideCat}/>}
-        <h2 className="text-white font-black text-[14px] leading-snug mt-1.5 line-clamp-2 drop-shadow">
-          {title}
-        </h2>
+        <h2 className="text-white font-black text-[14px] leading-snug mt-1.5 line-clamp-2 drop-shadow">{title}</h2>
       </div>
-
-      {/* Dots */}
       {slides.length > 1 && (
         <div className="absolute bottom-2.5 right-3 flex gap-1 z-10">
-          {slides.slice(0, 8).map((_, i) => (
-            <button
-              key={i}
-              onClick={e => { e.stopPropagation(); setIdx(i); }}
-              className={`rounded-full transition-all ${i === idx ? 'w-4 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/40 hover:bg-white/70'}`}
-            />
+          {slides.slice(0,8).map((_,i) => (
+            <button key={i} onClick={e => { e.stopPropagation(); setIdx(i); }}
+              className={`rounded-full transition-all ${i===idx?'w-4 h-1.5 bg-white':'w-1.5 h-1.5 bg-white/40 hover:bg-white/70'}`}/>
           ))}
         </div>
       )}
@@ -326,7 +535,6 @@ function HeroSlider({ items, category, mixedItems, onRead }) {
   );
 }
 
-// ── Side List ───────────────────────────────────────────────────────────────
 function SideList({ items, onRead }) {
   return (
     <div className="divide-y divide-slate-100">
@@ -351,7 +559,6 @@ function SideList({ items, onRead }) {
   );
 }
 
-// ── Latest Grid ─────────────────────────────────────────────────────────────
 function LatestGrid({ allNews, onRead }) {
   const { t } = useLang();
   const items = Object.entries(allNews)
@@ -362,8 +569,7 @@ function LatestGrid({ allNews, onRead }) {
     <div>
       <div className="flex items-center justify-between mb-4 pb-2.5 border-b-2 border-red-600">
         <h2 className="text-[14px] font-black text-slate-800 uppercase tracking-wide flex items-center gap-2">
-          <span className="w-1 h-5 bg-red-600 rounded-full"/>
-          Latest Updates
+          <span className="w-1 h-5 bg-red-600 rounded-full"/>Latest Updates
         </h2>
         <Link to="/" className="text-[9px] font-black text-red-600 no-underline uppercase tracking-widest border border-red-600 px-2.5 py-1 rounded hover:bg-red-600 hover:text-white transition-colors">
           {t("home.viewAll")||'All News'} ›
@@ -397,15 +603,13 @@ function LatestGrid({ allNews, onRead }) {
   );
 }
 
-// ── Category Section ────────────────────────────────────────────────────────
-function CategorySection({ category, news, onRead, onShare }) {
+function CategorySection({ category, news, onRead, onShare, adAfter }) {
   const { t } = useLang();
   const meta = CAT_META[category] || { tw:'bg-red-600', label:category, key:'', color:'#dc2626' };
   if (!news?.length) return null;
   const [hero,...rest] = news;
   return (
     <section className="mb-8">
-      {/* Header */}
       <div className="flex items-center justify-between mb-3 pb-2 border-b-2" style={{ borderColor: meta.color }}>
         <div className="flex items-center gap-2">
           <span className={`w-1 h-5 rounded-full ${meta.tw}`}/>
@@ -422,12 +626,10 @@ function CategorySection({ category, news, onRead, onShare }) {
         </Link>
       </div>
 
-      {/* Hero */}
       <div className="mb-3">
         <HeroSlider items={[hero,...rest.slice(0,2)]} category={category} onRead={onRead}/>
       </div>
 
-      {/* 2-col mini grid */}
       {rest.length >= 2 && (
         <div className="grid grid-cols-2 gap-2.5 mb-2.5">
           {rest.slice(0,2).map((item,i) => {
@@ -449,7 +651,6 @@ function CategorySection({ category, news, onRead, onShare }) {
         </div>
       )}
 
-      {/* List rows */}
       {rest.length > 2 && (
         <div className="bg-white rounded-lg border border-slate-200 px-3 divide-y divide-slate-100">
           {rest.slice(2,5).map((item,i) => {
@@ -470,11 +671,13 @@ function CategorySection({ category, news, onRead, onShare }) {
           })}
         </div>
       )}
+
+      {/* Ad after every 3rd section */}
+      {adAfter && <AdBlock slot="6666666666" className="mt-4" />}
     </section>
   );
 }
 
-// ── Filter Tabs ─────────────────────────────────────────────────────────────
 function FilterTabs({ active, onChange }) {
   const { t } = useLang();
   const tabs = ['All', ...ACTIVE_CATS];
@@ -496,7 +699,6 @@ function FilterTabs({ active, onChange }) {
   );
 }
 
-// ── Join CTA ────────────────────────────────────────────────────────────────
 function JoinCTA() {
   const { t } = useLang();
   return (
@@ -515,7 +717,6 @@ function JoinCTA() {
   );
 }
 
-// ── Social Strip ────────────────────────────────────────────────────────────
 function SocialStrip() {
   const { t } = useLang();
   const socials = [
@@ -533,8 +734,7 @@ function SocialStrip() {
         {socials.map(s => (
           <a key={s.label} href={s.url} target="_blank" rel="noreferrer"
             className="flex-1 flex flex-col items-center gap-1.5 py-3 bg-white border border-slate-200 rounded-xl no-underline hover:shadow-md hover:-translate-y-0.5 transition-all"
-            style={{ borderTop:`3px solid ${s.color}` }}
-          >
+            style={{ borderTop:`3px solid ${s.color}` }}>
             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-black" style={{ background:s.color }}>{s.icon}</div>
             <span className="text-[13px] font-black text-slate-800">{s.count}</span>
             <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wide">{s.label}</span>
@@ -545,13 +745,13 @@ function SocialStrip() {
   );
 }
 
-// ── Main ────────────────────────────────────────────────────────────────────
+// ─── MAIN HOME ────────────────────────────────────────────────────────────────
 export default function Home() {
   const { t } = useLang();
   const [categoryNews, setCategoryNews] = useState({});
   const [loading,      setLoading]      = useState(true);
   const [activeTab,    setActiveTab]    = useState('All');
-  const [readItem,     setReadItem]     = useState(null);   // { item, cat }
+  const [readItem,     setReadItem]     = useState(null);
   const [shareItem,    setShareItem]    = useState(null);
   const activeSections = navItems.filter(i => ACTIVE_CATS.includes(i.label));
 
@@ -574,33 +774,30 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Tag items with category
   const allTagged = Object.entries(categoryNews)
     .flatMap(([cat,arr]) => arr.map(item => ({ ...item, _cat:cat })));
 
-  // Shuffle slides from all categories for the center hero
   const shuffledHeroSlides = React.useMemo(() => {
     const picks = Object.entries(categoryNews)
-      .flatMap(([cat, arr]) => arr.slice(0, 2).map(item => ({ ...item, _cat: cat })));
+      .flatMap(([cat, arr]) => arr.slice(0,2).map(item => ({ ...item, _cat: cat })));
     for (let i = picks.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [picks[i], picks[j]] = [picks[j], picks[i]];
     }
-    return picks.slice(0, 10);
+    return picks.slice(0,10);
   }, [categoryNews]);
 
   const heroCategory = activeTab === 'All'
     ? (Object.keys(categoryNews).find(k => categoryNews[k]?.length > 0) || 'National')
     : activeTab;
   const heroItems  = categoryNews[heroCategory] || [];
-  const leftItems  = allTagged.filter(i => i._cat !== heroCategory).slice(0, 5);
-  const rightItems = allTagged.filter(i => i._cat !== heroCategory).slice(5, 10);
+  const leftItems  = allTagged.filter(i => i._cat !== heroCategory).slice(0,5);
+  const rightItems = allTagged.filter(i => i._cat !== heroCategory).slice(5,10);
 
   const displaySections = activeTab === 'All'
     ? activeSections
     : activeSections.filter(s => s.label === activeTab);
 
-  // Handlers
   const handleRead  = (item, cat) => setReadItem({ item, cat: cat || item._cat || '' });
   const handleShare = (item)      => setShareItem(item);
 
@@ -609,7 +806,7 @@ export default function Home() {
       <style>{`
         @keyframes shimmer   { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
         @keyframes fadeUp    { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes heroFade { from{opacity:0} to{opacity:1} }
+        @keyframes heroFade  { from{opacity:0} to{opacity:1} }
         @keyframes slideUp   { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
         .animate-shimmer     { animation:shimmer 1.5s infinite; }
         .animate-fadeUp      { animation:fadeUp 0.4s ease both; }
@@ -621,11 +818,8 @@ export default function Home() {
         * { box-sizing:border-box; }
       `}</style>
 
-      {/* Share Modal */}
       {shareItem && <ShareModal item={shareItem} onClose={() => setShareItem(null)}/>}
-
-      {/* Article Read Modal */}
-      {readItem && (
+      {readItem  && (
         <ArticleModal
           item={readItem.item}
           catName={readItem.cat}
@@ -652,7 +846,7 @@ export default function Home() {
           ) : (
             <div className="animate-fadeUp">
 
-              {/* Avatar strip — each avatar opens article */}
+              {/* Avatar strip */}
               {Object.keys(categoryNews).length > 0 && (
                 <AvatarStrip
                   allNews={Object.fromEntries(Object.entries(categoryNews).map(([k,v])=>[k,v.map(i=>({...i,_cat:k}))]))}
@@ -660,17 +854,19 @@ export default function Home() {
                 />
               )}
 
+              {/* ── TOP BANNER AD ── */}
+              <AdBlock slot="1111111111" />
+
               {/* Filter tabs */}
               <FilterTabs active={activeTab} onChange={setActiveTab}/>
 
-              {/* 3-col hero — desktop only */}
+              {/* 3-col hero desktop */}
               {activeTab === 'All' && (
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-3 mb-5">
                   <div className="hidden md:block bg-white rounded-xl border border-slate-200 p-3 shadow-sm">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><span className="w-1 h-3 bg-red-600 rounded-full inline-block"/>TOP STORIES</p>
                     <SideList items={leftItems} onRead={handleRead}/>
                   </div>
-                  {/* CENTER — shuffle all categories */}
                   <HeroSlider mixedItems={shuffledHeroSlides} onRead={handleRead}/>
                   <div className="hidden md:block bg-white rounded-xl border border-slate-200 p-3 shadow-sm">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><span className="w-1 h-3 bg-blue-600 rounded-full inline-block"/>MORE NEWS</p>
@@ -678,13 +874,34 @@ export default function Home() {
                   </div>
                 </div>
               )}
-              {/* Single-category hero */}
+
               {activeTab !== 'All' && heroItems.length > 0 && (
                 <div className="mb-5"><HeroSlider items={heroItems.slice(0,6)} category={heroCategory} onRead={handleRead}/></div>
               )}
+
+              {/* ── SCHOOL AD 1 ── */}
+              <div className="mb-3"><ClientBanner ad={CLIENT_ADS[0]} /></div>
+              {/* ── SCHOOL AD 2 ── */}
+              <div className="mb-4"><ClientBanner ad={CLIENT_ADS[1]} /></div>
+
               {/* Social + CTA */}
               <SocialStrip/>
               <JoinCTA/>
+
+              {/* ── COLLEGE ADS ── */}
+              <div className="mb-2">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                  <span className="text-[10px]">🎓</span> College Admissions
+                </p>
+                <div className="space-y-2.5">
+                  <ClientBanner ad={CLIENT_ADS[2]} />
+                  <ClientBanner ad={CLIENT_ADS[3]} />
+                  <ClientBanner ad={CLIENT_ADS[4]} />
+                </div>
+              </div>
+
+              {/* ── ADVERTISE WITH US CTA ── */}
+              <AdvertiseCTA />
 
               {/* Latest grid */}
               {activeTab === 'All' && (
@@ -693,16 +910,35 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Category sections */}
-              {displaySections.map(cat => (
+              {/* ── MID PAGE AD ── */}
+              <AdBlock slot="2222222222" />
+
+              {/* Category sections with ads every 3rd */}
+              {displaySections.map((cat, idx) => (
                 <CategorySection
                   key={cat.label}
                   category={cat.label}
                   news={categoryNews[cat.label]||[]}
                   onRead={handleRead}
                   onShare={handleShare}
+                  adAfter={idx % 3 === 2}
                 />
               ))}
+
+              {/* ── SHOPPING COMPLEX ADS ── */}
+              <div className="mb-4">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                  <span className="text-[10px]">🛍️</span> New Openings Near You
+                </p>
+                <div className="space-y-2.5">
+                  <ClientBanner ad={CLIENT_ADS[5]} />
+                  <ClientBanner ad={CLIENT_ADS[6]} />
+                  <ClientBanner ad={CLIENT_ADS[7]} />
+                </div>
+              </div>
+
+              {/* ── BOTTOM ADSENSE ── */}
+              <AdBlock slot="3333333333" />
 
               {/* Pagination */}
               <div className="flex items-center justify-center gap-1.5 mt-6">
