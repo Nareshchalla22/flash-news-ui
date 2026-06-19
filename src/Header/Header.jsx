@@ -182,7 +182,7 @@ const Header = () => {
       }}>
 
         {/* ══ TOP BAR ══ */}
-        <div style={{ background: '#0a0a0a', borderBottom: '3px solid #e8192c' }}>
+        <div style={{ background: '#13130f', borderBottom: '3px solid #e8192c' }}>
           <div style={{
             maxWidth: 1400, margin: '0 auto',
             padding: '0 14px', height: 80,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { newsService } from '../../services/api';
+import { newsService, adsService } from '../../services/api';
 import { navItems } from '../../Navbar/navdata';
 import { useLang } from '../../i18n/LanguageContext';
 import { Share2, X, Copy, Check, Clock, Calendar, User, ArrowRight } from 'lucide-react';
@@ -13,120 +13,9 @@ import { Share2, X, Copy, Check, Clock, Calendar, User, ArrowRight } from 'lucid
 const ADSENSE_CLIENT = 'ca-pub-XXXXXXXXXXXXXXXXX';
 const ADSENSE_READY  = ADSENSE_CLIENT !== 'ca-pub-XXXXXXXXXXXXXXXXX';
 
-// ── Client Ads — Schools, Colleges & Shopping Complex ─────────────────────
-// Update name/subtitle/url/image/phone for each real client before going live
-const CLIENT_ADS = [
+// Ads are now loaded from backend via adsService.getActive()
+// Manage them at /ads-dashboard
 
-  // ── SCHOOLS ──────────────────────────────────────────────────────────────
-  {
-    id:       1,
-    type:     'school',
-    image:    '',                                        // ← paste school logo URL
-    title:    'Sri Vidya English Medium School',         // ← school name
-    subtitle: '🎓 Admissions Open 2025–26 · Nursery to 10th · Call: 9876543210',
-    url:      'https://yourschool.com',                  // ← school website
-    bg:       '#0a1628',
-    accent:   '#3b82f6',                                 // blue — education
-    tag:      'Admissions Open',
-    phone:    '9876543210',
-    badge:    '🏫 School',
-  },
-  {
-    id:       2,
-    type:     'school',
-    image:    '',
-    title:    'Chaitanya High School',
-    subtitle: '📚 CBSE & State Board · Sports · Smart Classes · Hostel Available',
-    url:      'https://chaitanyaschool.com',
-    bg:       '#0a1a2e',
-    accent:   '#0ea5e9',
-    tag:      'Admissions Open',
-    phone:    '9000000001',
-    badge:    '🏫 School',
-  },
-
-  // ── COLLEGES ─────────────────────────────────────────────────────────────
-  {
-    id:       3,
-    type:     'college',
-    image:    '',                                        // ← college logo URL
-    title:    'Sri Sai Degree College',                  // ← college name
-    subtitle: '🎓 B.Com · BBA · BSc · BA · Lateral Entry Open · Hyderabad',
-    url:      'https://srisaicollege.com',
-    bg:       '#0f0a28',
-    accent:   '#8b5cf6',                                 // purple — higher education
-    tag:      'Admissions 2025',
-    phone:    '9000000002',
-    badge:    '🎓 College',
-  },
-  {
-    id:       4,
-    type:     'college',
-    image:    '',
-    title:    'Nalanda Junior College',
-    subtitle: '📖 MPC · BiPC · MEC · CEC · Intermediate · JEE & NEET Coaching',
-    url:      'https://nalandajrcollege.com',
-    bg:       '#1a0a28',
-    accent:   '#a855f7',
-    tag:      'Admissions Open',
-    phone:    '9000000003',
-    badge:    '🎓 Junior College',
-  },
-  {
-    id:       5,
-    type:     'college',
-    image:    '',
-    title:    'Viswam Engineering College',
-    subtitle: '🏗️ B.Tech · MBA · MCA · Approved by AICTE · Scholarships Available',
-    url:      'https://viswamcollege.com',
-    bg:       '#0a1f0a',
-    accent:   '#22c55e',
-    tag:      'Admissions Open',
-    phone:    '9000000004',
-    badge:    '🏛️ Engineering',
-  },
-
-  // ── SHOPPING COMPLEX ─────────────────────────────────────────────────────
-  {
-    id:       6,
-    type:     'shopping',
-    image:    '',                                        // ← shopping complex image
-    title:    'Grand Mall Hyderabad — Now Open!',        // ← mall name
-    subtitle: '🛍️ 200+ Stores · Food Court · Multiplex · Parking · Open Daily 10AM–10PM',
-    url:      'https://grandmallhyd.com',
-    bg:       '#1f0a0a',
-    accent:   '#ef4444',                                 // red — grand opening
-    tag:      '🎉 Grand Opening',
-    phone:    '9000000005',
-    badge:    '🛍️ Shopping Mall',
-  },
-  {
-    id:       7,
-    type:     'shopping',
-    image:    '',
-    title:    'City Square Shopping Complex',
-    subtitle: '🎊 New Launch! Fashion · Electronics · Grocery · Kids Zone · Free Entry',
-    url:      'https://citysquare.com',
-    bg:       '#1a0f00',
-    accent:   '#f59e0b',                                 // amber — new launch
-    tag:      '🆕 Now Open',
-    phone:    '9000000006',
-    badge:    '🏪 Shopping Complex',
-  },
-  {
-    id:       8,
-    type:     'shopping',
-    image:    '',
-    title:    'Sri Lakshmi Hypermarket',
-    subtitle: '🛒 Fresh Groceries · Daily Deals · Home Delivery Available · AP & TS',
-    url:      'https://srilakshmihyper.com',
-    bg:       '#001a0f',
-    accent:   '#10b981',
-    tag:      'Grand Opening',
-    phone:    '9000000007',
-    badge:    '🛒 Hypermarket',
-  },
-];
 
 // ─── ADSENSE SLOT COMPONENT ───────────────────────────────────────────────────
 function AdSenseSlot({ slot, format = 'auto', style = {} }) {
@@ -155,6 +44,11 @@ function AdSenseSlot({ slot, format = 'auto', style = {} }) {
 function ClientBanner({ ad }) {
   if (!ad) return null;
 
+  // Support both backend field names (accentColor/bgColor) and legacy (accent/bg)
+  const accent   = ad.accentColor || ad.accent || '#3b82f6';
+  const bg       = ad.bgColor     || ad.bg     || '#0a1628';
+  const imgUrl   = ad.imageUrl    || ad.image  || '';
+
   const typeIcon =
     ad.type === 'school'   ? '🏫' :
     ad.type === 'college'  ? '🎓' :
@@ -165,13 +59,21 @@ function ClientBanner({ ad }) {
     ad.type === 'college'  ? 'Apply Now →' :
     ad.type === 'shopping' ? 'Visit Now →' : 'Learn More →';
 
+  const handleClick = () => {
+    // Track click on backend
+    if (ad.id) {
+      adsService.trackClick(ad.id).catch(() => {});
+    }
+  };
+
   return (
     <a
       href={ad.url}
       target="_blank"
       rel="noopener noreferrer sponsored"
+      onClick={handleClick}
       className="block no-underline rounded-xl overflow-hidden hover:shadow-xl transition-all hover:-translate-y-0.5"
-      style={{ background: ad.bg, border: `1.5px solid ${ad.accent}40` }}
+      style={{ background: bg, border: `1.5px solid ${accent}40` }}
     >
       {/* Top accent line */}
       <div style={{ height: 3, background: `linear-gradient(90deg, ${ad.accent}, ${ad.accent}44)` }} />
@@ -236,24 +138,25 @@ function ClientBanner({ ad }) {
 }
 
 // ─── ROTATING CLIENT AD ───────────────────────────────────────────────────────
-function RotatingClientAd() {
+function RotatingClientAd({ ads = [] }) {
   const [idx, setIdx] = useState(0);
   useEffect(() => {
-    if (CLIENT_ADS.length <= 1) return;
-    const id = setInterval(() => setIdx(i => (i + 1) % CLIENT_ADS.length), 7000);
+    if (ads.length <= 1) return;
+    const id = setInterval(() => setIdx(i => (i + 1) % ads.length), 7000);
     return () => clearInterval(id);
-  }, []);
-  return <ClientBanner ad={CLIENT_ADS[idx]} />;
+  }, [ads.length]);
+  if (!ads.length) return null;
+  return <ClientBanner ad={ads[idx]} />;
 }
 
 // ─── COMBINED AD BLOCK ────────────────────────────────────────────────────────
 // Shows AdSense if ID is configured, else shows rotating client ad
-function AdBlock({ slot, className = '' }) {
+function AdBlock({ slot, className = '', ads = [] }) {
   return (
     <div className={`my-4 ${className}`}>
       {ADSENSE_READY
         ? <AdSenseSlot slot={slot} />
-        : <RotatingClientAd />
+        : <RotatingClientAd ads={ads} />
       }
     </div>
   );
@@ -440,7 +343,7 @@ function ArticleModal({ item, catName, onClose, onShare }) {
             </div>
 
             {/* ── In-article ad ── */}
-            <AdBlock slot="5555555555" className="mb-4" />
+            <AdBlock slot="5555555555" className="mb-4" ads={[]} />
 
             {f.description ? (
               f.description.split('\n').filter(Boolean).map((p,i) => (
@@ -603,7 +506,7 @@ function LatestGrid({ allNews, onRead }) {
   );
 }
 
-function CategorySection({ category, news, onRead, onShare, adAfter }) {
+function CategorySection({ category, news, onRead, onShare, adAfter, ads = [] }) {
   const { t } = useLang();
   const meta = CAT_META[category] || { tw:'bg-red-600', label:category, key:'', color:'#dc2626' };
   if (!news?.length) return null;
@@ -673,7 +576,7 @@ function CategorySection({ category, news, onRead, onShare, adAfter }) {
       )}
 
       {/* Ad after every 3rd section */}
-      {adAfter && <AdBlock slot="6666666666" className="mt-4" />}
+      {adAfter && <AdBlock slot="6666666666" className="mt-4" ads={ads} />}
     </section>
   );
 }
@@ -753,20 +656,34 @@ export default function Home() {
   const [activeTab,    setActiveTab]    = useState('All');
   const [readItem,     setReadItem]     = useState(null);
   const [shareItem,    setShareItem]    = useState(null);
+  const [clientAds,    setClientAds]    = useState({ school:[], college:[], shopping:[], all:[] });
   const activeSections = navItems.filter(i => ACTIVE_CATS.includes(i.label));
 
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
       try {
+        // Fetch news + ads in parallel
         const map = {};
-        await Promise.allSettled(activeSections.map(async cat => {
-          try {
-            const res = await newsService.getCategoryNews(cat.label.toLowerCase());
-            map[cat.label] = Array.isArray(res.data) ? res.data.slice(0,8) : [];
-          } catch { map[cat.label] = []; }
-        }));
+        const [,adsRes] = await Promise.all([
+          Promise.allSettled(activeSections.map(async cat => {
+            try {
+              const res = await newsService.getCategoryNews(cat.label.toLowerCase());
+              map[cat.label] = Array.isArray(res.data) ? res.data.slice(0,8) : [];
+            } catch { map[cat.label] = []; }
+          })),
+          adsService.getActive().catch(() => ({ data: [] })),
+        ]);
         setCategoryNews(map);
+
+        // Organise ads by type
+        const ads = Array.isArray(adsRes?.data) ? adsRes.data : [];
+        setClientAds({
+          school:   ads.filter(a => a.type === 'school'),
+          college:  ads.filter(a => a.type === 'college'),
+          shopping: ads.filter(a => a.type === 'shopping'),
+          all:      ads,
+        });
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
     };
@@ -855,7 +772,7 @@ export default function Home() {
               )}
 
               {/* ── TOP BANNER AD ── */}
-              <AdBlock slot="1111111111" />
+              <AdBlock slot="1111111111" ads={clientAds.all} />
 
               {/* Filter tabs */}
               <FilterTabs active={activeTab} onChange={setActiveTab}/>
@@ -879,26 +796,28 @@ export default function Home() {
                 <div className="mb-5"><HeroSlider items={heroItems.slice(0,6)} category={heroCategory} onRead={handleRead}/></div>
               )}
 
-              {/* ── SCHOOL AD 1 ── */}
-              <div className="mb-3"><ClientBanner ad={CLIENT_ADS[0]} /></div>
-              {/* ── SCHOOL AD 2 ── */}
-              <div className="mb-4"><ClientBanner ad={CLIENT_ADS[1]} /></div>
+              {/* ── SCHOOL ADS ── */}
+              {clientAds.school.length > 0 && (
+                <div className="mb-4 space-y-2.5">
+                  {clientAds.school.slice(0,2).map(ad => <ClientBanner key={ad.id} ad={ad} />)}
+                </div>
+              )}
 
               {/* Social + CTA */}
               <SocialStrip/>
               <JoinCTA/>
 
               {/* ── COLLEGE ADS ── */}
-              <div className="mb-2">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                  <span className="text-[10px]">🎓</span> College Admissions
-                </p>
-                <div className="space-y-2.5">
-                  <ClientBanner ad={CLIENT_ADS[2]} />
-                  <ClientBanner ad={CLIENT_ADS[3]} />
-                  <ClientBanner ad={CLIENT_ADS[4]} />
+              {clientAds.college.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <span>🎓</span> College Admissions
+                  </p>
+                  <div className="space-y-2.5">
+                    {clientAds.college.slice(0,3).map(ad => <ClientBanner key={ad.id} ad={ad} />)}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* ── ADVERTISE WITH US CTA ── */}
               <AdvertiseCTA />
@@ -911,7 +830,7 @@ export default function Home() {
               )}
 
               {/* ── MID PAGE AD ── */}
-              <AdBlock slot="2222222222" />
+              <AdBlock slot="2222222222" ads={clientAds.all} />
 
               {/* Category sections with ads every 3rd */}
               {displaySections.map((cat, idx) => (
@@ -922,23 +841,24 @@ export default function Home() {
                   onRead={handleRead}
                   onShare={handleShare}
                   adAfter={idx % 3 === 2}
+                  ads={clientAds.all}
                 />
               ))}
 
               {/* ── SHOPPING COMPLEX ADS ── */}
-              <div className="mb-4">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                  <span className="text-[10px]">🛍️</span> New Openings Near You
-                </p>
-                <div className="space-y-2.5">
-                  <ClientBanner ad={CLIENT_ADS[5]} />
-                  <ClientBanner ad={CLIENT_ADS[6]} />
-                  <ClientBanner ad={CLIENT_ADS[7]} />
+              {clientAds.shopping.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <span>🛍️</span> New Openings Near You
+                  </p>
+                  <div className="space-y-2.5">
+                    {clientAds.shopping.slice(0,3).map(ad => <ClientBanner key={ad.id} ad={ad} />)}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* ── BOTTOM ADSENSE ── */}
-              <AdBlock slot="3333333333" />
+              <AdBlock slot="3333333333" ads={clientAds.all} />
 
               {/* Pagination */}
               <div className="flex items-center justify-center gap-1.5 mt-6">
