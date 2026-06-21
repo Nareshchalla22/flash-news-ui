@@ -1,8 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
 
-// ── Core ──────────────────────────────────────────────────────────────────────
-import Home              from '../components/Pages/Home';
-import AllNewsFeedPage   from '../components/Pages/feed/AllNewsFeedPage';
+// ── Core Pages ────────────────────────────────────────────────────────────────
+import Home            from '../components/Pages/Home';
+import AllNewsFeedPage from '../components/Pages/feed/AllNewsFeedPage';
 
 // ── Category Pages ────────────────────────────────────────────────────────────
 import GlobalPage        from '../components/Pages/category/GlobalPage';
@@ -19,6 +19,7 @@ import TrendingPage      from '../components/Pages/category/TrendingPage';
 import LiveTVPage        from '../components/Pages/category/LiveTVPage';
 
 // ── Admin Pages ───────────────────────────────────────────────────────────────
+import AdminDashboard        from '../components/Admin/AdminDashboard';
 import AdminApplicationsPage from '../components/Admin/Adminapplicationspage';
 import AdsDashboard          from '../components/Admin/AdsDashboard';
 import UpdateNews            from '../components/Pages/Form/UpdateNews';
@@ -32,7 +33,6 @@ import ReporterJoinPage from '../components/Pages/pressid/Reporterjoinpage';
 import LoginPage        from '../auth/LoginPage';
 import UnauthorizedPage from '../auth/UnauthorizedPage';
 import { ProtectedRoute, PublicOnlyRoute } from '../auth/ProtectedRoute';
-import AdminDashboard from '../components/Admin/AdminDashboard';
 
 // ─── ROUTES ───────────────────────────────────────────────────────────────────
 const AppRoutes = () => {
@@ -40,39 +40,34 @@ const AppRoutes = () => {
     <Routes>
 
       {/* ── PUBLIC ── */}
-      <Route path="/"               element={<Home />} />
-      <Route path="/news-feed"      element={<AllNewsFeedPage />} />
-      <Route path="/global"         element={<GlobalPage />} />
-      <Route path="/national"       element={<NationalPage />} />
-      <Route path="/state"          element={<StatePage />} />
-      <Route path="/business"       element={<BusinessPage />} />
-      <Route path="/crime"          element={<CrimePage />} />
-      <Route path="/entertainment"  element={<EntertainmentPage />} />
-      <Route path="/sports"         element={<SportsPage />} />
-      <Route path="/health"         element={<HealthPage />} />
+      <Route path="/"              element={<Home />} />
+      <Route path="/news-feed"     element={<AllNewsFeedPage />} />
+      <Route path="/global"        element={<GlobalPage />} />
+      <Route path="/national"      element={<NationalPage />} />
+      <Route path="/state"         element={<StatePage />} />
+      <Route path="/business"      element={<BusinessPage />} />
+      <Route path="/crime"         element={<CrimePage />} />
+      <Route path="/entertainment" element={<EntertainmentPage />} />
+      <Route path="/sports"        element={<SportsPage />} />
+      <Route path="/health"        element={<HealthPage />} />
+      <Route path="/travel"        element={<TravelPage />} />
+      <Route path="/trending"      element={<TrendingPage />} />
+      <Route path="/live-tv"       element={<LiveTVPage />} />
       <Route path="/category/:name" element={<PoliticsPage />} />
-      <Route path="/travel"         element={<TravelPage />} />
-      <Route path="/trending"       element={<TrendingPage />} />
-      <Route path="/live-tv"        element={<LiveTVPage />} />
-      <Route path="/join"           element={<ReporterJoinPage />} />
-      <Route path="/unauthorized"   element={<UnauthorizedPage />} />
+      <Route path="/join"          element={<ReporterJoinPage />} />
+      <Route path="/unauthorized"  element={<UnauthorizedPage />} />
 
-      {/* ── PRESS ID ─────────────────────────────────────────────────────────
-           Public route — page handles its own auth guard internally.
-           Shows login prompt if not authenticated.
-           Shows apply prompt if not a reporter.
-           Shows full ID card if authenticated reporter/admin.
-      ── */}
+      {/* ── PRESS ID — self-guarded inside component ── */}
       <Route path="/id-card" element={<PressIdPage />} />
 
-      {/* ── LOGIN — redirect away if already signed in ── */}
+      {/* ── LOGIN ── */}
       <Route path="/login" element={
         <PublicOnlyRoute>
           <LoginPage />
         </PublicOnlyRoute>
       } />
 
-      {/* ── REPORTER + ADMIN: news publishing dashboard ── */}
+      {/* ── REPORTER + ADMIN ── */}
       <Route path="/admin" element={
         <ProtectedRoute requireReporter>
           <AdminDashboard />
@@ -85,7 +80,7 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
 
-      {/* ── ADMIN ONLY: management pages ── */}
+      {/* ── ADMIN ONLY ── */}
       <Route path="/ticker-control" element={
         <ProtectedRoute requireAdmin>
           <TickerManager />
@@ -107,34 +102,21 @@ const AppRoutes = () => {
       {/* ── 404 ── */}
       <Route path="*" element={
         <div style={{
-          minHeight: '60vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'column',
-          gap: 14,
+          minHeight: '60vh', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', flexDirection: 'column', gap: 14,
           background: '#0f0f0f',
         }}>
           <span style={{ fontSize: 60 }}>📡</span>
           <h2 style={{
-            fontSize: 34,
-            fontWeight: 900,
-            color: '#374151',
-            textTransform: 'uppercase',
-            fontStyle: 'italic',
-            margin: 0,
+            fontSize: 34, fontWeight: 900, color: '#374151',
+            textTransform: 'uppercase', fontStyle: 'italic', margin: 0,
           }}>
             404 — Signal Lost
           </h2>
           <p style={{ color: '#4b5563', fontSize: 13, margin: 0 }}>
             The page you're looking for doesn't exist.
           </p>
-          <a href="/" style={{
-            color: '#1DB954',
-            fontWeight: 700,
-            fontSize: 13,
-            textDecoration: 'none',
-          }}>
+          <a href="/" style={{ color: '#1DB954', fontWeight: 700, fontSize: 13, textDecoration: 'none' }}>
             ← Return to Home
           </a>
         </div>
