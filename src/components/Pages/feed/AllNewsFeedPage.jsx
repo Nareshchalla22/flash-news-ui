@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { newsService } from '../../../services/api';
 
@@ -371,7 +371,11 @@ export default function AllNewsFeedPage() {
         CATEGORIES.map(async cat => {
           try {
             const res = await newsService.getCategoryNews(cat.key);
-            results[cat.key] = Array.isArray(res.data) ? res.data : [];
+            const d = res.data;
+            results[cat.key] = Array.isArray(d) ? d
+              : Array.isArray(d?.content) ? d.content
+              : Array.isArray(d?.data)    ? d.data
+              : [];
           } catch {
             results[cat.key] = [];
           }

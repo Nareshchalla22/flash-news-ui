@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link} from 'react-router-dom';
 import { newsService, adsService } from '../../services/api';
 import { navItems } from '../../Navbar/navdata';
 import { useLang } from '../../i18n/LanguageContext';
@@ -21,7 +21,11 @@ const ADSENSE_READY  = ADSENSE_CLIENT !== 'ca-pub-XXXXXXXXXXXXXXXXX';
 function AdSenseSlot({ slot, format = 'auto', style = {} }) {
   useEffect(() => {
     if (!ADSENSE_READY) return;
-    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch {}
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (error) {
+      console.error('AdSense push failed', error);
+    }
   }, []);
 
   if (!ADSENSE_READY) return null;
@@ -91,12 +95,12 @@ function ClientBanner({ ad }) {
         {/* Logo / icon */}
         <div className="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden flex items-center justify-center border-2"
           style={{ background: `${ad.accent}18`, borderColor: `${ad.accent}40` }}>
-          {ad.image
-            ? <img src={ad.image} alt={ad.title} className="w-full h-full object-cover"
+          {imgUrl
+            ? <img src={imgUrl} alt={ad.title} className="w-full h-full object-cover"
                 onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
             : null
           }
-          <div className="w-full h-full flex items-center justify-center text-2xl" style={{ display: ad.image ? 'none' : 'flex' }}>
+          <div className="w-full h-full flex items-center justify-center text-2xl" style={{ display: imgUrl ? 'none' : 'flex' }}>
             {typeIcon}
           </div>
         </div>
@@ -395,12 +399,12 @@ function HeroSlider({ items, category, mixedItems, onRead }) {
   const timer = useRef(null);
   useEffect(() => {
     if (!slides.length) return;
-    setIdx(0);
     timer.current = setInterval(() => setIdx(p => (p + 1) % slides.length), 4500);
     return () => clearInterval(timer.current);
   }, [slides.length]);
   if (!slides.length) return null;
-  const slide    = slides[idx];
+  const currentIdx = Math.min(idx, slides.length - 1);
+  const slide    = slides[currentIdx];
   const slideCat = slide._cat || category || '';
   const { title, imageUrl } = extract(slide);
   return (
@@ -506,7 +510,7 @@ function LatestGrid({ allNews, onRead }) {
   );
 }
 
-function CategorySection({ category, news, onRead, onShare, adAfter, ads = [] }) {
+function CategorySection({ category, news, onRead, adAfter, ads = [] }) {
   const { t } = useLang();
   const meta = CAT_META[category] || { tw:'bg-red-600', label:category, key:'', color:'#dc2626' };
   if (!news?.length) return null;
@@ -650,7 +654,6 @@ function SocialStrip() {
 
 // ─── MAIN HOME ────────────────────────────────────────────────────────────────
 export default function Home() {
-  const { t } = useLang();
   const [categoryNews, setCategoryNews] = useState({});
   const [loading,      setLoading]      = useState(true);
   const [activeTab,    setActiveTab]    = useState('All');
@@ -669,7 +672,13 @@ export default function Home() {
           Promise.allSettled(activeSections.map(async cat => {
             try {
               const res = await newsService.getCategoryNews(cat.label.toLowerCase());
-              map[cat.label] = Array.isArray(res.data) ? res.data.slice(0,8) : [];
+              // Handle both plain array AND Spring Page {content:[...]}
+              const d = res.data;
+              const list = Array.isArray(d) ? d
+                : Array.isArray(d?.content) ? d.content
+                : Array.isArray(d?.data)    ? d.data
+                : [];
+              map[cat.label] = list.slice(0, 8);
             } catch { map[cat.label] = []; }
           })),
           adsService.getActive().catch(() => ({ data: [] })),
@@ -677,7 +686,10 @@ export default function Home() {
         setCategoryNews(map);
 
         // Organise ads by type
-        const ads = Array.isArray(adsRes?.data) ? adsRes.data : [];
+        const adsRaw = adsRes?.data;
+        const ads = Array.isArray(adsRaw) ? adsRaw
+          : Array.isArray(adsRaw?.content) ? adsRaw.content
+          : [];
         setClientAds({
           school:   ads.filter(a => a.type === 'school'),
           college:  ads.filter(a => a.type === 'college'),

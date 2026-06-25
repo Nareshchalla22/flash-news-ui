@@ -5,7 +5,7 @@ import {
   Clock, User, Calendar, X, Copy, Check,
 } from 'lucide-react';
 import SocialStats from '../Stats/SocialStats';
-import { useSEO } from '../..//hooks/useSEO';
+import { useSEO } from '../../hooks/useSEO';
 
 // ─── Field extractor ──────────────────────────────────────────────────────────
 function extractFields(item) {
@@ -204,7 +204,7 @@ function ReporterMeta({ item, onShare, light = false }) {
 }
 
 // ─── Article Card ─────────────────────────────────────────────────────────────
-function ArticleCard({ item, catName, onShare }) {
+function ArticleCard({ item, onShare }) {
   const f = extractFields(item);
   return (
     <div className="group cursor-pointer">
@@ -221,7 +221,12 @@ function ArticleCard({ item, catName, onShare }) {
 }
 
 // ─── MAIN LAYOUT ──────────────────────────────────────────────────────────────
-const CategoryLayout = ({ name, icon: Icon, news = [] }) => {
+const CategoryLayout = ({ name, icon: Icon, news: newsProp = [] }) => {
+  // Safety: handle Spring Page object or any non-array response
+  const news = Array.isArray(newsProp)          ? newsProp
+             : Array.isArray(newsProp?.content) ? newsProp.content
+             : [];
+
   const [shareItem, setShareItem] = useState(null);
 
   const mainFeature   = news[0];

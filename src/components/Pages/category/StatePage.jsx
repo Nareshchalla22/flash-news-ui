@@ -1,20 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { Map as MapIcon } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { newsService } from '../../../services/api';
-import CategoryLayout from '../../../components/shared/CategoryLayout';
+import { fetchCategoryNews } from '../../../utils/newsUtils';
+import CategoryLayout from '../../shared/CategoryLayout';
 
 const StatePage = () => {
-  const [news, setNews] = useState([]);
+  const [news,    setNews]    = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    newsService.getCategoryNews('state')
-      .then(res => { setNews(res.data); setLoading(false); })
-      .catch(() => setLoading(false));
+    fetchCategoryNews(newsService, 'state')
+      .then(data => { setNews(data); setLoading(false); })
+      .catch(()   => setLoading(false));
   }, []);
 
-  if (loading) return <div className="p-20 text-center font-black italic">LOADING STATE UPDATES...</div>;
-  return <CategoryLayout name="State" icon={MapIcon} news={news} />;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-xl font-black italic animate-pulse text-slate-400 uppercase tracking-tighter">
+          Loading State...
+        </div>
+      </div>
+    );
+  }
+
+  return <CategoryLayout name="State" icon={MapPin} news={news} />;
 };
+
 export default StatePage;

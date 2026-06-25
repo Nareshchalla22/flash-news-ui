@@ -1,20 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldAlert } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { newsService } from '../../../services/api';
-import CategoryLayout from '../../../components/shared/CategoryLayout';
+import { fetchCategoryNews } from '../../../utils/newsUtils';
+import CategoryLayout from '../../shared/CategoryLayout';
 
 const CrimePage = () => {
-  const [news, setNews] = useState([]);
+  const [news,    setNews]    = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    newsService.getCategoryNews('crime')
-      .then(res => { setNews(res.data); setLoading(false); })
-      .catch(() => setLoading(false));
+    fetchCategoryNews(newsService, 'crime')
+      .then(data => { setNews(data); setLoading(false); })
+      .catch(()   => setLoading(false));
   }, []);
 
-  if (loading) return <div className="p-20 text-center font-black italic">LOADING CRIME PULSE...</div>;
-  return <CategoryLayout name="Crime" icon={ShieldAlert} news={news} />;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-xl font-black italic animate-pulse text-slate-400 uppercase tracking-tighter">
+          Loading Crime...
+        </div>
+      </div>
+    );
+  }
+
+  return <CategoryLayout name="Crime" icon={AlertTriangle} news={news} />;
 };
+
 export default CrimePage;
