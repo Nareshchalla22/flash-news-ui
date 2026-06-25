@@ -30,7 +30,6 @@ const EMPTY_FORM = {
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 const typeBadge = (type) => AD_TYPES.find(t => t.value === type)?.label || '📢 Ad';
-const typeAccent = (type) => AD_TYPES.find(t => t.value === type)?.accent || '#6b7280';
 
 function fmtNum(n) {
   if (!n) return '0';

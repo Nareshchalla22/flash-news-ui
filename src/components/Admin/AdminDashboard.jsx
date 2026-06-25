@@ -119,14 +119,14 @@ function ImageUploadField({ value, onChange }) {
     if (!file.type.startsWith("image/")) { setError("Only image files allowed"); return; }
     if (file.size > 10 * 1024 * 1024)   { setError("File too large. Max 10MB."); return; }
     setError(""); setUploading(true); setProgress(10);
-    try { const p = await toBase64(file); onChange(p); } catch (_) {}
+    try { const p = await toBase64(file); onChange(p); } catch (error) { console.error(error); setError("Failed to read image file."); }
     const tick = setInterval(() => setProgress(p => Math.min(p + 12, 85)), 250);
     try {
       const s3Url = await uploadToS3(file);
       clearInterval(tick); setProgress(100);
       onChange(s3Url);
       setTimeout(() => setProgress(0), 800);
-    } catch (e) {
+    } catch {
       clearInterval(tick); setProgress(0);
       setError("⚠ S3 not configured — using preview only.");
     } finally {
