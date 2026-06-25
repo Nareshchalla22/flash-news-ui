@@ -1,44 +1,30 @@
 import axios from 'axios';
 
-// ─── API BASE URL ─────────────────────────────────────────────────────────────
-// localhost  → Spring Boot running locally on port 8080
-// production → AWS EC2 backend served via Nginx reverse proxy on port 80/443
-const getBaseURL = () => {
-  const host = window.location.hostname;
-  if (host === 'localhost' || host === '127.0.0.1') {
-    return 'http://localhost:8080/api';
-  }
-  // Production — ap13news.in proxies /api/* to EC2:8080 via Nginx
-  // OR direct EC2 if no Nginx proxy set up yet
-  return 'https://ap13news.in/api';
-};
+// ─── BASE URL ─────────────────────────────────────────────────────────────────
+const BASE_URL = window.location.hostname === 'localhost' ||
+                 window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:8080/api'
+  : 'https://ap13news.in/api';
 
-const BASE_URL = getBaseURL();
-
+// ─── AXIOS INSTANCE ───────────────────────────────────────────────────────────
 const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
   timeout: 30000,
-  withCredentials: false,
 });
 
-// ── Request interceptor — attach JWT ──────────────────────────────────────────
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('ap13_token');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// ── Attach JWT on every request ──────────────────────────────────────────────
+apiClient.interceptors.request.use(config => {
+  const token = localStorage.getItem('ap13_token');
+  if (token) config.headers['Authorization'] = `Bearer ${token}`;
+  return config;
+}, err => Promise.reject(err));
 
-// ── Response interceptor — handle auth errors ─────────────────────────────────
+// ── Handle 401/403 globally ───────────────────────────────────────────────────
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const status = error.response?.status;
+  res => res,
+  err => {
+    const status = err.response?.status;
     if (status === 401) {
       localStorage.removeItem('ap13_token');
       localStorage.removeItem('ap13_user');
@@ -46,56 +32,58 @@ apiClient.interceptors.response.use(
         window.location.href = '/login';
       }
     }
-    if (status === 403) {
-      window.location.href = '/unauthorized';
-    }
-    return Promise.reject(error);
+    return Promise.reject(err);
   }
 );
 
-// ── Services ──────────────────────────────────────────────────────────────────
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
 export const authService = {
-  login:    (credentials) => apiClient.post('/auth/login', credentials),
-  register: (userData)    => apiClient.post('/auth/register', userData),
-  me:       ()            => apiClient.get('/auth/me'),
+  login:           (data)     => apiClient.post('/auth/login', data),
+  register:        (data)     => apiClient.post('/auth/register', data),
+  me:              ()         => apiClient.get('/auth/me'),
+  listUsers:       ()         => apiClient.get('/auth/users'),
+  toggleUser:      (id)       => apiClient.patch(`/auth/users/${id}/toggle`),
+  activateReporter:(id, data) => apiClient.post(`/auth/activate-reporter/${id}`, data),
 };
 
+// ─── NEWS ─────────────────────────────────────────────────────────────────────
 export const newsService = {
-  getCategoryNews:  (category)           => apiClient.get(`/${category}`),
-  getSingleNews:    (category, id)       => apiClient.get(`/${category}/${id}`),
-  postNews:         (category, data)     => apiClient.post(`/${category}`, data),
-  updateNews:       (category, id, data) => apiClient.put(`/${category}/${id}`, data),
-  deleteNews:       (category, id)       => apiClient.delete(`/${category}/${id}`),
+  getCategoryNews: (category)            => apiClient.get(`/${category}`),
+  getSingleNews:   (category, id)        => apiClient.get(`/${category}/${id}`),
+  postNews:        (category, data)      => apiClient.post(`/${category}`, data),
+  updateNews:      (category, id, data)  => apiClient.put(`/${category}/${id}`, data),
+  deleteNews:      (category, id)        => apiClient.delete(`/${category}/${id}`),
 };
 
+// ─── TICKER ───────────────────────────────────────────────────────────────────
 export const tickerService = {
-  getAll:    ()            => apiClient.get('/all'),
-  getActive: ()            => apiClient.get('/all/active'),
-  create:    (payload)     => apiClient.post('/create', payload),
-  update:    (id, payload) => apiClient.put(`/update/${id}`, payload),
-  toggle:    (id)          => apiClient.patch(`/ticker/${id}/toggle`),
-  delete:    (id)          => apiClient.delete(`/ticker/${id}`),
+  getAll:    ()           => apiClient.get('/all'),
+  getActive: ()           => apiClient.get('/all/active'),
+  create:    (data)       => apiClient.post('/create', data),
+  update:    (id, data)   => apiClient.put(`/update/${id}`, data),
+  toggle:    (id)         => apiClient.patch(`/ticker/${id}/toggle`),
+  delete:    (id)         => apiClient.delete(`/ticker/${id}`),
 };
 
+// ─── MEDIA UPLOAD ─────────────────────────────────────────────────────────────
 export const mediaService = {
-  upload:       (formData) => apiClient.post('/media/upload', formData, {
+  upload: (formData) => apiClient.post('/media/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
-  uploadBase64: (data)     => apiClient.post('/media/upload-base64', data),
-  delete:       (url)      => apiClient.delete('/media/delete', { data: { url } }),
-  health:       ()         => apiClient.get('/media/health'),
+  delete: (url) => apiClient.delete('/media/delete', { data: { url } }),
 };
 
+// ─── REPORTER APPLICATIONS ────────────────────────────────────────────────────
 export const reporterService = {
   submit:      (data)       => apiClient.post('/reporter-application', data),
   getAll:      ()           => apiClient.get('/reporter-application'),
-  getById:     (id)         => apiClient.get(`/reporter-application/${id}`),
   getByStatus: (status)     => apiClient.get(`/reporter-application/status/${status}`),
   approve:     (id, note)   => apiClient.put(`/reporter-application/${id}/approve`, { note }),
   reject:      (id, note)   => apiClient.put(`/reporter-application/${id}/reject`, { note }),
   delete:      (id)         => apiClient.delete(`/reporter-application/${id}`),
 };
 
+// ─── ADS ──────────────────────────────────────────────────────────────────────
 export const adsService = {
   getAll:          ()        => apiClient.get('/ads'),
   getActive:       ()        => apiClient.get('/ads/active'),
