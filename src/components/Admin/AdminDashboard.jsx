@@ -5,7 +5,7 @@ import { useAuth } from "../../auth/AuthContext";
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 const BASE_URL = window.location.hostname === "localhost"
   ? "http://localhost:8080/api"
-  : "https://ap13news.in/api";
+  : "https://api.ap13news.in/api";
 
 const CATEGORIES = {
   global:        { label: "Global",        color: "indigo",  fields: ["title", "description", "imageUrl", "date", "reporterName"] },
