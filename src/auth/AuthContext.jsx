@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useCallback, useEffect } from "rea
 // ─── API BASE URL ─────────────────────────────────────────────────────────────
 const BASE_URL = window.location.hostname === "localhost"
   ? "http://localhost:8080/api"
-  : "https://ap13news.in/api";
+  : "https://api.ap13news.in/api";
 
 const AuthContext = createContext(null);
 
