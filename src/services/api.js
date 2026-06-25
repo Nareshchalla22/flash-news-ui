@@ -4,7 +4,7 @@ import axios from 'axios';
 const BASE_URL = window.location.hostname === 'localhost' ||
                  window.location.hostname === '127.0.0.1'
   ? 'http://localhost:8080/api'
-  : 'https://ap13news.in/api';
+  : 'https://api.ap13news.in/api';
 
 // ─── AXIOS INSTANCE ───────────────────────────────────────────────────────────
 const apiClient = axios.create({
