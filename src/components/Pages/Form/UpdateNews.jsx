@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Database, Send, AlertCircle, CheckCircle } from 'lucide-react';
 import { newsService } from '../../../services/api';
+import MultiImageUpload from '../../shared/MultiImageUpload';
+import { parseImages, withImages } from '../../../utils/images';
 
 const UpdateNews = () => {
     const [category, setCategory] = useState('politics');
@@ -8,7 +10,7 @@ const UpdateNews = () => {
     const [status, setStatus] = useState({ type: '', text: '' });
     
     const initialFormState = {
-        title: '', description: '', imageUrl: '', 
+        title: '', description: '', imageUrl: '', imageUrls: '', 
         matchTitle: '', scoreUpdate: '', summary: '',
         companyName: '', headline: '', analysis: '', stockUpdate: '',
         movieTitle: '', celebrityName: '', gossipContent: '',
@@ -16,20 +18,6 @@ const UpdateNews = () => {
     };
 
     const [formData, setFormData] = useState(initialFormState);
-
-    const handleImageUpload = (e) => {
-        const file = e.target.files[0];
-        if (file && file.size > 1048576) { // 1MB Limit
-            setStatus({ type: 'error', text: 'Image too large! Use a file under 1MB.' });
-            return;
-        }
-        
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setFormData({ ...formData, imageUrl: reader.result });
-        };
-        if (file) reader.readAsDataURL(file);
-    };
 
     const categories = ["global", "national", "state", "business", "crime", "entertainment", "sports", "health", "politics", "travel"];
 
@@ -55,20 +43,14 @@ const UpdateNews = () => {
 
     const inputClass = "w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:border-blue-500 transition-all";
 
-    const ImageUploadSection = () => (
+    const imageSection = (
         <div className="space-y-2">
-            <label className="block text-[10px] font-black uppercase text-slate-400 ml-1">Upload Local Image (Base64)</label>
-            <div className="flex items-center gap-4">
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="flex-1 px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-                {formData.imageUrl && (
-                    <img src={formData.imageUrl} alt="Preview" className="w-16 h-16 rounded-xl object-cover border-2 border-blue-500 shadow-md" />
-                )}
-            </div>
+            <label className="block text-[10px] font-black uppercase text-slate-400 ml-1">Images (first one is the cover)</label>
+            <MultiImageUpload
+                light
+                value={parseImages(formData)}
+                onChange={(urls) => setFormData(f => withImages(f, urls))}
+            />
         </div>
     );
 
@@ -81,7 +63,7 @@ const UpdateNews = () => {
                         <input type="text" placeholder="Headline" className={inputClass} value={formData.headline} onChange={(e) => setFormData({ ...formData, headline: e.target.value })} />
                         <textarea placeholder="Market Analysis" rows="4" className={inputClass} value={formData.analysis} onChange={(e) => setFormData({ ...formData, analysis: e.target.value })} />
                         <input type="text" placeholder="Stock Update" className={inputClass} value={formData.stockUpdate} onChange={(e) => setFormData({ ...formData, stockUpdate: e.target.value })} />
-                        <ImageUploadSection />
+                        {imageSection}
                     </div>
                 );
             case 'sports':
@@ -90,7 +72,7 @@ const UpdateNews = () => {
                         <input type="text" placeholder="Match Title" className={inputClass} value={formData.matchTitle} onChange={(e) => setFormData({ ...formData, matchTitle: e.target.value })} />
                         <input type="text" placeholder="Score Update" className={inputClass} value={formData.scoreUpdate} onChange={(e) => setFormData({ ...formData, scoreUpdate: e.target.value })} />
                         <textarea placeholder="Match Summary" rows="4" className={inputClass} value={formData.summary} onChange={(e) => setFormData({ ...formData, summary: e.target.value })} />
-                        <ImageUploadSection />
+                        {imageSection}
                     </div>
                 );
             default:
@@ -98,7 +80,7 @@ const UpdateNews = () => {
                     <div className="space-y-4">
                         <input type="text" placeholder="News Title" className={inputClass} value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
                         <textarea placeholder="Detailed Content" rows="5" className={inputClass} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
-                        <ImageUploadSection />
+                        {imageSection}
                     </div>
                 );
         }

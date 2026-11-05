@@ -71,6 +71,14 @@ export const mediaService = {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   delete: (url) => apiClient.delete('/media/delete', { data: { url } }),
+  // helpers used by shared upload components
+  uploadFile: (file, folder = 'news') => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('folder', folder);
+    return apiClient.post('/media/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+  deleteFile: (url) => apiClient.delete('/media/delete', { data: { url } }),
 };
 
 // ─── REPORTER APPLICATIONS ────────────────────────────────────────────────────

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import QRCodeLib from 'qrcode';
 import { useAuth } from '../../../auth/AuthContext';
 import { Link } from 'react-router-dom';
 
@@ -10,18 +11,20 @@ const PLAN_CONFIG = {
 const DEFAULT_PLAN = { label: 'Reporter', color: '#1DB954', dark: '#0a1f10', badge: 'REPORTER', icon: '📰' };
 
 function QRCode({ value, size = 76 }) {
-  return (
-    <img
-      src={`https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}&bgcolor=111827&color=ffffff&margin=6`}
-      alt="QR Code"
-      width={size} height={size}
-      style={{ borderRadius: 6, display: 'block' }}
-    />
-  );
+  const [src, setSrc] = useState('');
+  useEffect(() => {
+    let live = true;
+    QRCodeLib.toDataURL(value, { width: size * 4, margin: 1, color: { dark: '#ffffff', light: '#111827' } })
+      .then(url => { if (live) setSrc(url); })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [value, size]);
+  if (!src) return <div style={{ width: size, height: size, borderRadius: 6, background: '#111827' }} />;
+  return <img src={src} alt="QR Code" width={size} height={size} style={{ borderRadius: 6, display: 'block' }} />;
 }
 
 // ── FRONT ─────────────────────────────────────────────────────────────────────
-function CardFront({ user, plan, idNumber }) {
+function CardFront({ user, plan, idNumber, photoSrc }) {
   return (
     <div style={{
       width: 340, height: 215, borderRadius: 18, flexShrink: 0,
@@ -61,8 +64,8 @@ function CardFront({ user, plan, idNumber }) {
       <div style={{ display: 'flex', gap: 12, padding: '10px 14px' }}>
         {/* Photo */}
         <div style={{ width: 68, height: 82, borderRadius: 10, background: `${plan.color}15`, border: `2px solid ${plan.color}30`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {user?.photoUrl
-            ? <img src={user.photoUrl} alt="Reporter" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => e.target.style.display = 'none'} />
+          {photoSrc
+            ? <img src={photoSrc} alt="Reporter" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => e.target.style.display = 'none'} />
             : <span style={{ fontSize: 30, opacity: 0.25 }}>👤</span>
           }
         </div>
@@ -167,6 +170,28 @@ export default function PressIdPage() {
   const { user, isAuthenticated, isReporter, isAdmin } = useAuth();
   const [copied,   setCopied]   = useState(false);
   const [showBack, setShowBack] = useState(false);
+  const [photoData, setPhotoData] = useState(null);
+  const [dlBusy,    setDlBusy]    = useState('');
+  const [dlError,   setDlError]   = useState('');
+  const frontRef = useRef(null);
+  const backRef  = useRef(null);
+
+  // Inline the profile photo as a data URL so it can be exported to PNG/PDF
+  // (cross-origin images would otherwise taint the canvas). Needs S3 CORS GET.
+  useEffect(() => {
+    let live = true;
+    if (!user?.photoUrl) { setPhotoData(null); return; }
+    fetch(user.photoUrl, { mode: 'cors' })
+      .then(r => r.blob())
+      .then(blob => new Promise((res, rej) => {
+        const fr = new FileReader();
+        fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(blob);
+      }))
+      .then(d => { if (live) setPhotoData(d); })
+      .catch(() => { if (live) setPhotoData(null); });
+    return () => { live = false; };
+  }, [user?.photoUrl]);
+  const photoSrc = photoData || user?.photoUrl || null;
 
   const planKey = user?.planId?.toLowerCase() || '';
   const plan    = PLAN_CONFIG[planKey] || DEFAULT_PLAN;
@@ -182,6 +207,41 @@ export default function PressIdPage() {
   };
 
   const handlePrint = () => window.print();
+
+  const snap = async (node) => {
+    const { default: html2canvas } = await import('html2canvas');
+    return html2canvas(node, { scale: 4, backgroundColor: null, useCORS: true, logging: false });
+  };
+  const saveBlob = (canvas, name) => new Promise((resolve) => {
+    canvas.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      resolve();
+    }, 'image/png');
+  });
+  const runDownload = async (kind, fn) => {
+    setDlError(''); setDlBusy(kind);
+    try { await fn(); }
+    catch (e) { console.error(e); setDlError('Download failed. Please try again.'); }
+    finally { setDlBusy(''); }
+  };
+  const downloadPng = (side) => runDownload(side, async () => {
+    const canvas = await snap(side === 'front' ? frontRef.current : backRef.current);
+    await saveBlob(canvas, `${idNumber}-${side}.png`);
+  });
+  const downloadPdf = () => runDownload('pdf', async () => {
+    const { jsPDF } = await import('jspdf');
+    const [f, b] = [await snap(frontRef.current), await snap(backRef.current)];
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const w = 85.6, h = 54, x = (210 - w) / 2;
+    pdf.setFontSize(11); pdf.text(`AP13 News — Press ID ${idNumber}`, 105, 20, { align: 'center' });
+    pdf.addImage(f.toDataURL('image/png'), 'PNG', x, 30, w, h);
+    pdf.addImage(b.toDataURL('image/png'), 'PNG', x, 30 + h + 10, w, h);
+    pdf.setFontSize(8); pdf.text('Front & back · print at 100% scale (credit-card size)', 105, 30 + h * 2 + 20, { align: 'center' });
+    pdf.save(`${idNumber}.pdf`);
+  });
 
   // ── Not logged in ──────────────────────────────────────────────────────────
   if (!isAuthenticated) {
@@ -234,9 +294,15 @@ export default function PressIdPage() {
         #press-id-printable { display: none; }
       `}</style>
 
+      {/* Off-screen render used only for PNG/PDF export */}
+      <div aria-hidden="true" style={{ position: 'fixed', left: -10000, top: 0, pointerEvents: 'none' }}>
+        <div ref={frontRef} style={{ width: 340, height: 215 }}><CardFront user={user} plan={plan} idNumber={idNumber} photoSrc={photoSrc} /></div>
+        <div ref={backRef}  style={{ width: 340, height: 215, marginTop: 20 }}><CardBack  user={user} plan={plan} idNumber={idNumber} /></div>
+      </div>
+
       {/* Print-only section */}
       <div id="press-id-printable">
-        <CardFront user={user} plan={plan} idNumber={idNumber} />
+        <CardFront user={user} plan={plan} idNumber={idNumber} photoSrc={photoSrc} />
         <CardBack  user={user} plan={plan} idNumber={idNumber} />
       </div>
 
@@ -291,7 +357,7 @@ export default function PressIdPage() {
             <div style={{ overflowX: 'auto', paddingBottom: 8 }}>
               {showBack
                 ? <CardBack  user={user} plan={plan} idNumber={idNumber} />
-                : <CardFront user={user} plan={plan} idNumber={idNumber} />
+                : <CardFront user={user} plan={plan} idNumber={idNumber} photoSrc={photoSrc} />
               }
             </div>
           </div>
@@ -303,6 +369,16 @@ export default function PressIdPage() {
               onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
               🖨️ Print ID Card
             </button>
+            <button onClick={downloadPdf} disabled={!!dlBusy}
+              style={{ padding: '10px 20px', borderRadius: 10, background: '#fff', border: 'none', color: '#000', fontWeight: 800, cursor: dlBusy ? 'wait' : 'pointer', fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.08em', opacity: dlBusy ? 0.6 : 1 }}>
+              {dlBusy === 'pdf' ? 'Preparing…' : '⬇️ Download PDF'}
+            </button>
+            {['front', 'back'].map(side => (
+              <button key={side} onClick={() => downloadPng(side)} disabled={!!dlBusy}
+                style={{ padding: '10px 20px', borderRadius: 10, background: '#1e293b', border: '1px solid #334155', color: '#94a3b8', fontWeight: 700, cursor: dlBusy ? 'wait' : 'pointer', fontSize: 13, opacity: dlBusy ? 0.6 : 1 }}>
+                {dlBusy === side ? 'Preparing…' : `🖼️ ${side === 'front' ? 'Front' : 'Back'} PNG`}
+              </button>
+            ))}
             <button onClick={handleCopy} style={{ padding: '10px 20px', borderRadius: 10, background: copied ? '#1DB95420' : '#1e293b', border: `1px solid ${copied ? '#1DB95460' : '#334155'}`, color: copied ? '#1DB954' : '#94a3b8', fontWeight: 700, cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', gap: 7, transition: 'all 0.2s' }}>
               {copied ? '✓ Copied!' : '📋 Copy ID Number'}
             </button>
@@ -310,6 +386,8 @@ export default function PressIdPage() {
               ⚡ Dashboard
             </Link>
           </div>
+
+          {dlError && <p style={{ color: '#f87171', fontSize: 12, marginTop: -16, marginBottom: 20 }}>⚠ {dlError}</p>}
 
           {/* ── REPORTER INFO ── */}
           <div style={{ background: '#161616', border: '1px solid #1e293b', borderRadius: 16, overflow: 'hidden', marginBottom: 16 }}>

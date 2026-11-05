@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Share2, ArrowLeft, Calendar, Clock, User, Copy, Check, X } from 'lucide-react';
 import { newsService } from '../../../services/api';
+import { parseImages } from '../../../utils/images';
 
 const CAT_META = {
   global:        { color:'#2563eb', label:'WORLD',      tw:'bg-blue-600'   },
@@ -16,7 +17,7 @@ const CAT_META = {
 };
 
 function extract(item) {
-  if (!item) return { title:'', description:'', imageUrl:'', reporterName:'', date:'', createdAt:'' };
+  if (!item) return { title:'', description:'', imageUrl:'', images:[], reporterName:'', date:'', createdAt:'' };
   return {
     title:        item.title        || item.matchTitle   || item.movieTitle  ||
                   item.companyName  || item.gadgetHead   || item.headline    || '',
@@ -24,6 +25,7 @@ function extract(item) {
                   item.gossipContent|| item.medicalAdvice|| item.techReview  ||
                   item.globalReport || item.stockUpdate  || '',
     imageUrl:     item.imageUrl     || item.image        || '',
+    images:       parseImages(item),
     reporterName: item.reporterName || '',
     date:         item.date         || '',
     createdAt:    item.createdAt    || item.publishedAt  || item.updatedAt   || '',
@@ -54,6 +56,53 @@ function SafeImg({ src, alt, className }) {
     </div>
   );
   return <img src={src} alt={alt||''} className={className} onError={() => setErr(true)} />;
+}
+
+// ── Gallery (multiple images) ───────────────────────────────────────────────
+function Gallery({ images, alt }) {
+  const [idx, setIdx] = useState(0);
+  const [open, setOpen] = useState(false);
+  if (!images || !images.length) return null;
+  const cur = images[Math.min(idx, images.length - 1)];
+  const step = (d) => setIdx(i => (i + d + images.length) % images.length);
+  return (
+    <div>
+      <div className="relative w-full aspect-video bg-slate-100 cursor-zoom-in" onClick={() => setOpen(true)}>
+        <SafeImg src={cur} alt={alt} className="w-full h-full object-cover"/>
+        {images.length > 1 && (
+          <>
+            <button onClick={e => { e.stopPropagation(); step(-1); }} aria-label="Previous image"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white text-lg cursor-pointer">‹</button>
+            <button onClick={e => { e.stopPropagation(); step(1); }} aria-label="Next image"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white text-lg cursor-pointer">›</button>
+            <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/60 text-white text-[11px] font-bold">{idx + 1} / {images.length}</span>
+          </>
+        )}
+      </div>
+      {images.length > 1 && (
+        <div className="flex gap-2 p-2 overflow-x-auto bg-slate-50 border-b border-slate-200">
+          {images.map((u, i) => (
+            <button key={u + i} onClick={() => setIdx(i)}
+              className={`flex-shrink-0 w-16 h-12 rounded overflow-hidden border-2 cursor-pointer ${i === idx ? 'border-red-500' : 'border-transparent opacity-70'}`}>
+              <img src={u} alt="" className="w-full h-full object-cover"/>
+            </button>
+          ))}
+        </div>
+      )}
+      {open && (
+        <div className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
+          <img src={cur} alt={alt} className="max-w-full max-h-full object-contain"/>
+          {images.length > 1 && (
+            <>
+              <button onClick={e => { e.stopPropagation(); step(-1); }} className="absolute left-4 text-white text-4xl cursor-pointer">‹</button>
+              <button onClick={e => { e.stopPropagation(); step(1); }} className="absolute right-4 text-white text-4xl cursor-pointer">›</button>
+            </>
+          )}
+          <button onClick={() => setOpen(false)} className="absolute top-4 right-4 text-white text-2xl cursor-pointer">✕</button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ── Share Panel ─────────────────────────────────────────────────────────────
@@ -297,11 +346,7 @@ export default function ArticleDetail() {
             <article className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200">
 
               {/* Hero image */}
-              {f.imageUrl && (
-                <div className="w-full aspect-video bg-slate-100">
-                  <SafeImg src={f.imageUrl} alt={f.title} className="w-full h-full object-cover"/>
-                </div>
-              )}
+              {f.images.length > 0 && <Gallery images={f.images} alt={f.title}/>}
 
               <div className="px-5 sm:px-8 py-6">
 

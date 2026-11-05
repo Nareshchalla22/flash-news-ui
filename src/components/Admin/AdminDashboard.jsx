@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
+import MultiImageUpload from "../shared/MultiImageUpload";
+import { parseImages, serializeImages } from "../../utils/images";
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 const BASE_URL = window.location.hostname === "localhost"
@@ -11,9 +13,9 @@ const CATEGORIES = {
   global:        { label: "Global",        color: "indigo",  fields: ["title", "description", "imageUrl", "date", "reporterName"] },
   national:      { label: "National",      color: "emerald", fields: ["title", "description", "imageUrl", "date", "reporterName"] },
   state:         { label: "State",         color: "amber",   fields: ["title", "description", "imageUrl", "date", "reporterName"] },
-  business:      { label: "Business",      color: "cyan",    fields: ["companyName", "headline", "analysis", "stockUpdate", "reporterName"] },
+  business:      { label: "Business",      color: "cyan",    fields: ["companyName", "headline", "analysis", "stockUpdate", "imageUrl", "reporterName"] },
   crime:         { label: "Crime",         color: "red",     fields: ["title", "description", "imageUrl", "date", "reporterName"] },
-  entertainment: { label: "Entertainment", color: "purple",  fields: ["movieTitle", "celebrityName", "gossipContent", "reporterName"] },
+  entertainment: { label: "Entertainment", color: "purple",  fields: ["movieTitle", "celebrityName", "gossipContent", "imageUrl", "reporterName"] },
   sports:        { label: "Sports",        color: "orange",  fields: ["matchTitle", "scoreUpdate", "summary", "imageUrl", "reporterName"] },
   health:        { label: "Health",        color: "teal",    fields: ["title", "topic", "medicalAdvice", "doctorConsultant", "imageUrl", "reporterName"] },
   politics:      { label: "Politics",      color: "blue",    fields: ["title", "description", "imageUrl", "reporterName", "date"] },
@@ -24,7 +26,7 @@ const CATEGORIES = {
 const FIELD_META = {
   title:            { label: "Title",           type: "text"     },
   description:      { label: "Description",     type: "textarea" },
-  imageUrl:         { label: "Image",           type: "image"    },
+  imageUrl:         { label: "Images",          type: "image"    },
   date:             { label: "Date",            type: "date"     },
   companyName:      { label: "Company Name",    type: "text"     },
   headline:         { label: "Headline",        type: "text"     },
@@ -82,149 +84,6 @@ async function apiFetch(path, method = "GET", body = null) {
   return method === "DELETE" ? null : res.json();
 }
 
-async function uploadToS3(file) {
-  const token = localStorage.getItem("ap13_token");
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("folder", "news");
-  const res = await fetch(`${BASE_URL}/media/upload`, {
-    method: "POST",
-    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: formData,
-  });
-  if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
-  const data = await res.json();
-  return data.url || data.imageUrl || data.s3Url || "";
-}
-
-function toBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload  = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-// ─── IMAGE UPLOAD FIELD ───────────────────────────────────────────────────────
-function ImageUploadField({ value, onChange }) {
-  const [uploading,  setUploading]  = useState(false);
-  const [progress,   setProgress]   = useState(0);
-  const [error,      setError]      = useState("");
-  const [dragOver,   setDragOver]   = useState(false);
-  const [uploadMode, setUploadMode] = useState("upload");
-  const fileRef = useRef(null);
-
-  const processFile = async (file) => {
-    if (!file.type.startsWith("image/")) { setError("Only image files allowed"); return; }
-    if (file.size > 10 * 1024 * 1024)   { setError("File too large. Max 10MB."); return; }
-    setError(""); setUploading(true); setProgress(10);
-    try { const p = await toBase64(file); onChange(p); } catch (error) { console.error(error); setError("Failed to read image file."); }
-    const tick = setInterval(() => setProgress(p => Math.min(p + 12, 85)), 250);
-    try {
-      const s3Url = await uploadToS3(file);
-      clearInterval(tick); setProgress(100);
-      onChange(s3Url);
-      setTimeout(() => setProgress(0), 800);
-    } catch {
-      clearInterval(tick); setProgress(0);
-      setError("⚠ S3 not configured — using preview only.");
-    } finally {
-      setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
-    }
-  };
-
-  const handleFileInput = (e) => { const f = e.target.files?.[0]; if (f) processFile(f); };
-  const handleDrop = (e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f) processFile(f); };
-  const handleRemove = () => { onChange(""); setError(""); setProgress(0); };
-
-  const isS3Url  = value && value.startsWith("http");
-  const isBase64 = value && value.startsWith("data:");
-  const hasImage = isS3Url || isBase64;
-
-  return (
-    <div>
-      <div className="flex gap-1 mb-2 p-0.5 bg-slate-950 rounded-lg w-fit">
-        {["upload","url"].map(m => (
-          <button key={m} type="button" onClick={() => setUploadMode(m)}
-            className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider transition-all cursor-pointer
-              ${uploadMode === m ? "bg-slate-700 text-white" : "text-slate-500 hover:text-slate-300"}`}>
-            {m === "upload" ? "📁 Upload File" : "🔗 Paste URL"}
-          </button>
-        ))}
-      </div>
-
-      {uploadMode === "url" ? (
-        <div className="space-y-2">
-          <input type="text" value={value || ""} onChange={e => { onChange(e.target.value); setError(""); }}
-            placeholder="https://example.com/image.jpg"
-            className="w-full px-3 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 text-sm outline-none focus:border-slate-600 transition-colors"/>
-          {hasImage && (
-            <div className="relative w-full h-32 rounded-lg overflow-hidden border border-slate-700">
-              <img src={value} alt="Preview" className="w-full h-full object-cover"
-                onError={e => { e.target.style.display = "none"; setError("Invalid image URL"); }}/>
-              <button type="button" onClick={handleRemove}
-                className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-600 text-white text-xs flex items-center justify-center cursor-pointer hover:bg-red-700">✕</button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div>
-          <input ref={fileRef} type="file" accept="image/*" onChange={handleFileInput} className="hidden"/>
-          {hasImage ? (
-            <div className="relative w-full rounded-xl overflow-hidden border border-slate-700 bg-slate-950">
-              <img src={value} alt="Uploaded" className="w-full h-44 object-cover" onError={e => { e.target.src = ""; }}/>
-              <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-all flex items-center justify-center gap-3 opacity-0 hover:opacity-100">
-                <button type="button" onClick={() => fileRef.current?.click()}
-                  className="px-3 py-1.5 bg-white/90 text-slate-900 rounded-lg text-xs font-bold cursor-pointer hover:bg-white">🔄 Change</button>
-                <button type="button" onClick={handleRemove}
-                  className="px-3 py-1.5 bg-red-600/90 text-white rounded-lg text-xs font-bold cursor-pointer hover:bg-red-600">🗑 Remove</button>
-              </div>
-              {isS3Url  && <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-green-600/90 rounded text-[9px] font-bold text-white uppercase tracking-wider">✓ S3 Uploaded</div>}
-              {isBase64 && <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-yellow-600/90 rounded text-[9px] font-bold text-white uppercase tracking-wider">⚠ Local Preview</div>}
-            </div>
-          ) : (
-            <div
-              onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={handleDrop}
-              onClick={() => !uploading && fileRef.current?.click()}
-              className={`relative w-full h-44 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-3 transition-all
-                ${dragOver ? "border-blue-400 bg-blue-500/10" : "border-slate-700 hover:border-slate-500 bg-slate-950 hover:bg-slate-900/50"}
-                ${uploading ? "cursor-wait" : "cursor-pointer"}`}>
-              {uploading ? (
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-10 h-10 rounded-full border-slate-700 border-t-blue-400 animate-spin" style={{ border:'3px solid', borderTopColor:'#60a5fa' }}/>
-                  <p className="text-xs font-bold text-slate-400">Uploading to S3...</p>
-                  <div className="w-32 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500 rounded-full transition-all duration-300" style={{ width:`${progress}%` }}/>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center text-2xl">{dragOver ? "📥" : "🖼️"}</div>
-                  <div className="text-center px-4">
-                    <p className="text-sm font-bold text-slate-300 mb-1">{dragOver ? "Drop image here" : "Click to upload or drag & drop"}</p>
-                    <p className="text-xs text-slate-600">JPG, PNG, WebP, GIF — max 10MB</p>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-          {hasImage && (
-            <button type="button" onClick={() => fileRef.current?.click()}
-              className="mt-2 w-full py-1.5 rounded-lg border border-slate-700 text-slate-500 hover:text-slate-300 text-xs font-bold cursor-pointer transition-colors bg-slate-900 hover:bg-slate-800">
-              📁 Upload Different Image
-            </button>
-          )}
-        </div>
-      )}
-      {error && <p className="mt-2 text-xs text-yellow-400 font-semibold flex items-start gap-1.5"><span>⚠</span><span>{error}</span></p>}
-    </div>
-  );
-}
-
 // ─── FORM FIELDS ──────────────────────────────────────────────────────────────
 function FormFields({ fields, form, onChange, autoReporterName }) {
   return (
@@ -242,7 +101,10 @@ function FormFields({ fields, form, onChange, autoReporterName }) {
               {isImage    && <span className="text-[9px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded normal-case tracking-normal">Upload</span>}
             </label>
             {isImage ? (
-              <ImageUploadField value={form[field] || ""} onChange={url => onChange(field, url)} />
+              <MultiImageUpload
+                value={parseImages(form)}
+                onChange={urls => { onChange("imageUrls", serializeImages(urls)); onChange("imageUrl", urls[0] || ""); }}
+              />
             ) : meta.type === "textarea" ? (
               <textarea rows={3} value={form[field] || ""} onChange={e => onChange(field, e.target.value)}
                 className="w-full px-3 py-2.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 text-sm outline-none focus:border-slate-600 resize-none transition-colors"/>
@@ -262,7 +124,7 @@ function FormFields({ fields, form, onChange, autoReporterName }) {
 // ─── CREATE MODAL ─────────────────────────────────────────────────────────────
 function CreateModal({ category, catKey, onClose, onSuccess, reporterName }) {
   const fields = CATEGORIES[catKey]?.fields || [];
-  const [form,    setForm]    = useState(Object.fromEntries(fields.map(f => [f, f === "reporterName" ? reporterName || "" : ""])));
+  const [form,    setForm]    = useState({ ...Object.fromEntries(fields.map(f => [f, f === "reporterName" ? reporterName || "" : ""])), imageUrls: "" });
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
   const colors = COLOR_MAP[CATEGORIES[catKey]?.color] || COLOR_MAP.indigo;
@@ -303,7 +165,7 @@ function CreateModal({ category, catKey, onClose, onSuccess, reporterName }) {
 // ─── EDIT MODAL ───────────────────────────────────────────────────────────────
 function EditModal({ record, category, catKey, onClose, onSuccess, reporterName }) {
   const fields = CATEGORIES[catKey]?.fields || [];
-  const [form,    setForm]    = useState(Object.fromEntries(fields.map(f => [f, record[f] || ""])));
+  const [form,    setForm]    = useState({ ...Object.fromEntries(fields.map(f => [f, record[f] || ""])), imageUrls: serializeImages(parseImages(record)) });
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
   const colors = COLOR_MAP[CATEGORIES[catKey]?.color] || COLOR_MAP.indigo;
@@ -702,8 +564,9 @@ export default function AdminDashboard() {
                           {displayFields.map(f => (
                             <td key={f} className="px-4 py-3">
                               {f === "imageUrl" ? (
-                                <div className="w-12 h-9 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center text-slate-600 text-xs">
-                                  {r[f] ? <img src={r[f]} alt="" className="w-full h-full object-cover" onError={e=>e.target.style.display="none"}/> : "📷"}
+                                <div className="relative w-12 h-9 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center text-slate-600 text-xs">
+                                  {(parseImages(r)[0]) ? <img src={parseImages(r)[0]} alt="" className="w-full h-full object-cover" onError={e=>e.target.style.display="none"}/> : "📷"}
+                                  {parseImages(r).length > 1 && <span className="absolute bottom-0 right-0 px-1 bg-black/70 text-white text-[9px] font-bold rounded-tl">+{parseImages(r).length - 1}</span>}
                                 </div>
                               ) : (
                                 <span className="block max-w-[160px] truncate text-xs text-slate-400" title={r[f]||""}>
