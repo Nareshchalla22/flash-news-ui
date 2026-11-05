@@ -1,6 +1,34 @@
 import { useState, useRef } from 'react';
 import { mediaService } from '../../services/api';
 
+
+// Shrinks big photos in the browser so they fit servers with small upload limits.
+// Target: under ~900KB, max 1600px wide/tall, JPEG. Small files are sent as-is.
+async function compressImage(file, targetBytes = 900 * 1024, maxDim = 1600) {
+  if (file.size <= targetBytes || file.type === 'image/gif' || file.type === 'image/svg+xml') return file;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    let quality = 0.85, blob = null;
+    while (quality >= 0.4) {
+      blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+      if (blob && blob.size <= targetBytes) break;
+      quality -= 0.1;
+    }
+    if (!blob || blob.size >= file.size) return file;
+    return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+  } catch {
+    return file;
+  }
+}
+
 /**
  * MultiImageUpload — upload several images to S3 for one news post.
  *
@@ -51,14 +79,14 @@ export default function MultiImageUpload({
       const f = queue[i];
       setStatus(`Uploading ${i + 1} of ${queue.length}…`);
       if (!f.type.startsWith('image/')) { failed.push(`${f.name}: not an image`); continue; }
-      if (f.size > maxMB * 1024 * 1024) { failed.push(`${f.name}: over ${maxMB}MB`); continue; }
+      if (f.size > 25 * 1024 * 1024) { failed.push(`${f.name}: over 25MB`); continue; }
       try {
-        const res = await mediaService.uploadFile(f, folder);
+        const res = await mediaService.uploadFile(await compressImage(f), folder);
         const url = res.data?.url || res.data?.imageUrl || res.data?.s3Url;
         if (!url) throw new Error('No URL returned');
         push(url);
       } catch (e) {
-        failed.push(`${f.name}: ${e?.response?.status || 'network error'} ${e?.response?.data?.message || 'upload failed'}`);
+        failed.push(`${f.name}: ${e?.response?.data?.message || 'upload failed'}`);
       }
     }
     setBusy(false); setStatus('');
@@ -123,7 +151,7 @@ export default function MultiImageUpload({
             <>
               <p className={`text-sm font-bold ${t.text}`}>📷 Click or drop to add images</p>
               <p className={`text-xs mt-1 ${t.sub}`}>
-                Select multiple · {value.length}/{max} added · max {maxMB}MB each
+                Select multiple · {value.length}/{max} added · large photos are auto-resized
               </p>
             </>
           )}
