@@ -1,5 +1,16 @@
 {
   "rewrites": [
+    {
+      "source": "/category/:cat/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|WhatsApp|Twitterbot|TelegramBot|LinkedInBot|Slackbot|Discordbot|Pinterest|SkypeUriPreview|Applebot|Googlebot|bingbot).*"
+        }
+      ],
+      "destination": "https://api.ap13news.in/api/meta/category/:cat/:id"
+    },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
