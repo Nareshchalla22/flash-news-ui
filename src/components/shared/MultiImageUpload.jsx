@@ -1,5 +1,18 @@
-import { useState, useRef } from 'react';
-import { mediaService } from '../../services/api';
+import { useState, useRef, useEffect } from 'react';
+// Photos are uploaded straight from the browser to Cloudinary (free plan).
+const CLOUD_NAME    = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+async function uploadImage(file) {
+  if (!CLOUD_NAME || !UPLOAD_PRESET) throw new Error('Cloudinary is not configured');
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', UPLOAD_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
+  const data = await res.json();
+  if (!res.ok || !data.secure_url) throw new Error(data?.error?.message || 'upload failed');
+  return data.secure_url;
+}
 
 
 // Shrinks big photos in the browser so they fit servers with small upload limits.
@@ -36,12 +49,10 @@ async function compressImage(file, targetBytes = 900 * 1024, maxDim = 1600) {
  *   value     string[]            current image URLs (first = cover image)
  *   onChange  (string[]) => void  called with the full new list
  *   max       number              max images (default 10)
- *   maxMB     number              max size per file (default 10)
  *   light     boolean             light theme (UpdateNews); default dark (Admin)
- *   folder    string              S3 folder (default 'news')
  */
 export default function MultiImageUpload({
-  value = [], onChange, max = 10, maxMB = 10, light = false, folder = 'news',
+  value = [], onChange, max = 10, light = false,
 }) {
   const [busy, setBusy]     = useState(false);
   const [status, setStatus] = useState('');
@@ -50,7 +61,7 @@ export default function MultiImageUpload({
   const [urlInput, setUrlInput] = useState('');
   const fileRef = useRef(null);
   const listRef = useRef(value);
-  if (!busy) listRef.current = value;
+  useEffect(() => { if (!busy) listRef.current = value; }, [value, busy]);
 
   const t = light
     ? { box: 'bg-slate-50 border-slate-300 hover:border-blue-400', text: 'text-slate-600', sub: 'text-slate-400',
@@ -81,12 +92,10 @@ export default function MultiImageUpload({
       if (!f.type.startsWith('image/')) { failed.push(`${f.name}: not an image`); continue; }
       if (f.size > 25 * 1024 * 1024) { failed.push(`${f.name}: over 25MB`); continue; }
       try {
-        const res = await mediaService.uploadFile(await compressImage(f), folder);
-        const url = res.data?.url || res.data?.imageUrl || res.data?.s3Url;
-        if (!url) throw new Error('No URL returned');
+        const url = await uploadImage(await compressImage(f));
         push(url);
       } catch (e) {
-        failed.push(`${f.name}: ${e?.response?.data?.message || 'upload failed'}`);
+        failed.push(`${f.name}: ${e?.message || 'upload failed'}`);
       }
     }
     setBusy(false); setStatus('');
