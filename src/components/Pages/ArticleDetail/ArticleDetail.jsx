@@ -106,9 +106,23 @@ function Gallery({ images, alt }) {
 }
 
 // ── Share Panel ─────────────────────────────────────────────────────────────
-function SharePanel({ title, url, onClose }) {
+function SharePanel({ title, url, image, onClose }) {
   const [copied, setCopied] = useState(false);
   const text = `${title} — AP13 News`;
+
+  const shareWithImage = async () => {
+    try {
+      const src = image && image.includes('res.cloudinary.com') && image.includes('/upload/')
+        ? image.replace('/upload/', '/upload/w_1200,q_auto,f_jpg/') : image;
+      const blob = await (await fetch(src)).blob();
+      const file = new File([blob], 'ap13-news.jpg', { type: blob.type || 'image/jpeg' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], text: `${text}\n${url}` });
+      } else {
+        await navigator.share({ title: text, url });
+      }
+    } catch { /* user cancelled */ }
+  };
 
   const options = [
     { label:'WhatsApp', icon:'💬', color:'#25D366', bg:'#dcfce7', href:`https://wa.me/?text=${encodeURIComponent(text+'\n'+url)}`           },
@@ -153,6 +167,14 @@ function SharePanel({ title, url, onClose }) {
               {copied ? <><Check size={10}/>Done</> : <><Copy size={10}/>Copy</>}
             </button>
           </div>
+          {typeof navigator !== 'undefined' && navigator.share && image && (
+            <button
+              onClick={shareWithImage}
+              className="w-full mt-2.5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-[11px] font-black rounded-xl flex items-center justify-center gap-2 transition-colors"
+            >
+              <Share2 size={13}/> Share with Image (WhatsApp Status)
+            </button>
+          )}
           {typeof navigator !== 'undefined' && navigator.share && (
             <button
               onClick={() => navigator.share({ title: text, url }).catch(() => {})}
@@ -307,7 +329,7 @@ export default function ArticleDetail() {
       `}</style>
 
       {sharing && (
-        <SharePanel title={f.title} url={articleUrl} onClose={() => setSharing(false)}/>
+        <SharePanel title={f.title} url={articleUrl} image={f.images?.[0] || f.imageUrl} onClose={() => setSharing(false)}/>
       )}
 
       <div className="min-h-screen bg-[#eef0f3]" style={{ animation:'fadeIn 0.3s ease' }}>
